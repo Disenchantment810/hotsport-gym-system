@@ -197,6 +197,28 @@ INSERT INTO `tbluser` (`id`, `fname`, `lname`, `email`, `mobile`, `password`, `s
 (6, 'John', 'Doe', 'john@test.com', '1425635241', 'f925916e2754e5e03f75dd58a5733251', 'Delhi', 'New Delhi', 'ABC Street XYZ Colony', '2022-05-22 02:31:54'),
 (7, 'Md. Mehedi', 'Hasan', 'abc@gmail.com', '1608445456', '3f009d72559f51e7e454b16e5d0687a1', 'Code Camp BD', 'Bogura', NULL, '2023-10-07 09:56:22');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tblattendance`
+--
+
+CREATE TABLE `tblattendance` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `check_in` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `check_out` datetime NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `tbluser`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tblattendance`
+--
+
+-- No initial data
+
 --
 -- Indexes for dumped tables
 --
@@ -288,6 +310,12 @@ ALTER TABLE `tblpayment`
 --
 ALTER TABLE `tbluser`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `tblattendance`
+--
+ALTER TABLE `tblattendance`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

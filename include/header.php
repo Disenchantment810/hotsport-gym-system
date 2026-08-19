@@ -51,6 +51,7 @@
 			<li><a href="admin/">Admin</a></li>
 					<?php else :?>
 						<li><a href="Booking-History.php">Booking History</a></li>
+					<li><a href="attendance-history.php">Attendance History</a></li>
 						<?php endif;?>
 				</ul>
 			</div>

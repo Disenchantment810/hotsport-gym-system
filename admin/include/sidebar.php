@@ -32,8 +32,15 @@
           </ul>
         </li>
 
-        
-     	
+        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-calendar"></i><span class="app-menu__label">Attendance</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+          <ul class="treeview-menu">
+            <li><a class="treeview-item" href="attendance.php"><i class="icon fa fa-circle-o"></i> Check In/Out</a></li>
+            <li><a class="treeview-item" href="attendance-report.php"><i class="icon fa fa-circle-o"></i> Attendance Report</a></li>
+          </ul>
+        </li>
+
+
+
 
           <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-th-list"></i><span class="app-menu__label">Report</span><i class="treeview-indicator fa fa-angle-right"></i></a>
           <ul class="treeview-menu">
