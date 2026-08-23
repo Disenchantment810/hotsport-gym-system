@@ -21,6 +21,12 @@
             <li><a class="treeview-item" href="manage-post.php"><i class="icon fa fa-circle-o"></i> Manage</a></li>
           </ul>
         </li>
+        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-calendar"></i><span class="app-menu__label">Class Management</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+          <ul class="treeview-menu">
+            <li><a class="treeview-item" href="add-class.php"><i class="icon fa fa-circle-o"></i> Add Class</a></li>
+            <li><a class="treeview-item" href="manage-class.php"><i class="icon fa fa-circle-o"></i> Manage Class</a></li>
+          </ul>
+        </li>
 
 
  <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-th-list"></i><span class="app-menu__label">Booking History</span><i class="treeview-indicator fa fa-angle-right"></i></a>

@@ -219,6 +219,50 @@ CREATE TABLE `tblattendance` (
 
 -- No initial data
 
+-- --------------------------------------------------------
+--
+-- Table structure for table `tblclass`
+--
+CREATE TABLE `tblclass` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `title` varchar(255) NOT NULL,
+  `description` text,
+  `instructor` varchar(255) NOT NULL,
+  `class_date` datetime NOT NULL,
+  `duration` int(11) NOT NULL,
+  `capacity` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `image` varchar(255) NULL,
+  `create_date` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tblclass`
+--
+
+-- No initial data
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `tblclassbooking`
+--
+CREATE TABLE `tblclassbooking` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `class_id` int(11) NOT NULL,
+  `userid` int(11) NOT NULL,
+  `booking_date` timestamp NULL DEFAULT current_timestamp(),
+  `payment` varchar(45) DEFAULT NULL,
+  `paymentType` varchar(45) DEFAULT NULL,
+  FOREIGN KEY (`class_id`) REFERENCES `tblclass`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`userid`) REFERENCES `tbluser`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tblclassbooking`
+--
+
+-- No initial data
+
 --
 -- Indexes for dumped tables
 --
@@ -315,6 +359,16 @@ ALTER TABLE `tbluser`
 -- AUTO_INCREMENT for table `tblattendance`
 --
 ALTER TABLE `tblattendance`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `tblclass`
+--
+ALTER TABLE `tblclass`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `tblclassbooking`
+--
+ALTER TABLE `tblclassbooking`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
