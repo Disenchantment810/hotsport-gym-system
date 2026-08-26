@@ -53,6 +53,14 @@
 						<li><a href="Booking-History.php">Booking History</a></li>
 							<li><a href="classes.php">Classes</a></li>
 					<li><a href="attendance-history.php">Attendance History</a></li>
+							<li>
+								<a href="progress-dashboard.php">Progress Tracking</a>
+								<ul class="sub-menu">
+									<li><a href="goal-setting.php">Goal Setting</a></li>
+									<li><a href="workout-logging.php">Workout Logging</a></li>
+									<li><a href="progress-dashboard.php">Progress Dashboard</a></li>
+								</ul>
+							</li>
 						<?php endif;?>
 				</ul>
 			</div>

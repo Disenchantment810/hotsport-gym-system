@@ -370,6 +370,85 @@ ALTER TABLE `tblclass`
 --
 ALTER TABLE `tblclassbooking`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tblgoals`
+--
+
+CREATE TABLE `tblgoals` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `goal_type` varchar(50) NOT NULL COMMENT 'e.g., weight, chest, workout_frequency',
+  `target_value` decimal(10,2) NOT NULL,
+  `current_value` decimal(10,2) DEFAULT '0.00',
+  `unit` varchar(20) NOT NULL COMMENT 'e.g., kg, cm, times/week',
+  `target_date` date NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `tbluser`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tblworkouts`
+--
+
+CREATE TABLE `tblworkouts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `workout_date` date NOT NULL,
+  `duration` int(11) DEFAULT NULL COMMENT 'minutes',
+  `calories_burned` int(11) DEFAULT NULL,
+  `notes` text,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `tbluser`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tblworkout_exercises`
+--
+
+CREATE TABLE `tblworkout_exercises` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `workout_id` int(11) NOT NULL,
+  `exercise_name` varchar(100) NOT NULL,
+  `sets` int(11) NOT NULL,
+  `reps` int(11) NOT NULL,
+  `weight` decimal(10,2) DEFAULT NULL COMMENT 'weight used in kg/lbs',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`workout_id`) REFERENCES `tblworkouts`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `tblgoals`
+--
+ALTER TABLE `tblgoals`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `tblworkouts`
+--
+ALTER TABLE `tblworkouts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `tblworkout_exercises`
+--
+ALTER TABLE `tblworkout_exercises`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

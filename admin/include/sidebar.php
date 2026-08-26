@@ -45,6 +45,13 @@
           </ul>
         </li>
 
+        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-bar-chart"></i><span class="app-menu__label">Progress Reports</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+          <ul class="treeview-menu">
+            <li><a class="treeview-item" href="progress-reports.php"><i class="icon fa fa-circle-o"></i> View Progress Reports</a></li>
+            <li><a class="treeview-item" href="view-member-progress.php"><i class="icon fa fa-circle-o"></i> View Member Progress</a></li>
+          </ul>
+        </li>
+
 
 
 
