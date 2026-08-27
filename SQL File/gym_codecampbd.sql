@@ -428,6 +428,41 @@ CREATE TABLE `tblworkout_exercises` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `tblannouncements`
+--
+
+CREATE TABLE `tblannouncements` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `message` text NOT NULL,
+  `priority` varchar(20) NOT NULL DEFAULT 'General' COMMENT 'General, Important, Urgent, Event',
+  `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '1=Active, 0=Archived',
+  `created_by` varchar(100) DEFAULT 'Admin',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tblannouncement_reads`
+--
+
+CREATE TABLE `tblannouncement_reads` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `announcement_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `read_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_user_announcement` (`announcement_id`, `user_id`),
+  FOREIGN KEY (`announcement_id`) REFERENCES `tblannouncements`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`user_id`) REFERENCES `tbluser`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -449,8 +484,21 @@ ALTER TABLE `tblworkouts`
 ALTER TABLE `tblworkout_exercises`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
+--
+-- AUTO_INCREMENT for table `tblannouncements`
+--
+ALTER TABLE `tblannouncements`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `tblannouncement_reads`
+--
+ALTER TABLE `tblannouncement_reads`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+-- End of dump

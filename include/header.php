@@ -52,7 +52,8 @@
 					<?php else :?>
 						<li><a href="Booking-History.php">Booking History</a></li>
 							<li><a href="classes.php">Classes</a></li>
-					<li><a href="attendance-history.php">Attendance History</a></li>
+							<li><a href="attendance-history.php">Attendance History</a></li>
+							<li><a href="announcements.php">Announcements</a></li>
 							<li>
 								<a href="progress-dashboard.php">Progress Tracking</a>
 								<ul class="sub-menu">

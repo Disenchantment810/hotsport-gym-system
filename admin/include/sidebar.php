@@ -55,7 +55,14 @@
 
 
 
-          <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-th-list"></i><span class="app-menu__label">Report</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-bullhorn"></i><span class="app-menu__label">Announcements</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+          <ul class="treeview-menu">
+            <li><a class="treeview-item" href="add-announcement.php"><i class="icon fa fa-circle-o"></i> Add Announcement</a></li>
+            <li><a class="treeview-item" href="manage-announcements.php"><i class="icon fa fa-circle-o"></i> Manage Announcements</a></li>
+          </ul>
+        </li>
+
+        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-th-list"></i><span class="app-menu__label">Report</span><i class="treeview-indicator fa fa-angle-right"></i></a>
           <ul class="treeview-menu">
             <li><a class="treeview-item" href="report-booking.php"><i class="icon fa fa-circle-o"></i>Booking Report</a></li>
             <li><a class="treeview-item" href="report-registration.php"><i class="icon fa fa-circle-o"></i>Registration Report</a></li>
