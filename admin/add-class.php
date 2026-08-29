@@ -4,6 +4,9 @@
 	if (strlen($_SESSION['adminid'])==0) {
 	  header('location:logout.php');
 	  } else {
+	// Class creation has moved to the Trainer portal. This admin page is retired.
+	header('location:index.php');
+	exit;
 	if(isset($_POST['submit'])){
 	$title = $_POST['title'];
 	$description = $_POST['description'];
@@ -123,7 +126,7 @@
                 </div>
 
                 <div class="form-group col-md-6">
-                  <label class="control-label">Price ($)</label>
+                  <label class="control-label">Price (Ksh)</label>
                   <input class="form-control" name="price" id="price" type="number" step="0.01" placeholder="Enter Price">
                 </div>
 

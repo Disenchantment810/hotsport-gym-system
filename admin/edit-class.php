@@ -4,6 +4,9 @@
 	if (strlen($_SESSION['adminid'])==0) {
 	  header('location:logout.php');
 	} else {
+	// Class management has moved to the Trainer portal. This admin page is retired.
+	header('location:index.php');
+	exit;
 	$msg = '';
 	$errormsg = '';
 

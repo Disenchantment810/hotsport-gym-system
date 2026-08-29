@@ -80,6 +80,8 @@ if(isset($_POST['submit'])) {
           </div>
           <hr />
           <a href="../index.php">Back to Home Page</a>
+          <br />
+          <a href="../trainer/login.php">Trainer Login</a>
         </form>
         <form class="forget-form" action="index.html">
           <h3 class="login-head"><i class="fa fa-lg fa-fw fa-lock"></i>Forgot Password ?</h3>

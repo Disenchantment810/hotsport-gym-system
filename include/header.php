@@ -17,6 +17,10 @@
 						<i class="material-icons">account_circle</i>
 						<a href="login.php"><p>Login</p></a>
 					</div>
+					<div class="header-info d-none d-md-inline-flex">
+						<i class="material-icons">fitness_center</i>
+						<a href="trainer/login.php"><p>Trainer Login</p></a>
+					</div>
 					<?php else :?>
 					<div class="header-info d-none d-md-inline-flex">
 						<i class="material-icons">account_circle</i>
@@ -52,6 +56,8 @@
 					<?php else :?>
 						<li><a href="Booking-History.php">Booking History</a></li>
 							<li><a href="classes.php">Classes</a></li>
+							<li><a href="class-series.php">Class Series</a></li>
+							<li><a href="my-enrollments.php">My Enrollments</a></li>
 							<li><a href="attendance-history.php">Attendance History</a></li>
 							<li><a href="announcements.php">Announcements</a></li>
 							<li>
