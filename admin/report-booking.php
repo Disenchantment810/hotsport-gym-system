@@ -118,7 +118,7 @@ where date(booking_date) between :fdate and :tdate";
                     <td><?php echo htmlentities($result->bookingdate);?></td>
                     <td hidden><?php echo htmlentities($result->title);?></td>
                     <td><?php echo htmlentities($result->PackageDuratiobn);?></td>
-                    <td><?php echo $result->Price;?></td>
+                    <td>Ksh <?php echo number_format((float)$result->Price, 2);?></td>
                     <td hidden><?php echo $result->Description;?></td>
                     <td><?php echo htmlentities($result->category_name);?></td>
                     <td><?php echo htmlentities($result->PackageName);?></td>

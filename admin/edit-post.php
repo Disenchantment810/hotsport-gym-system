@@ -129,7 +129,7 @@ echo "<script>window.location.href='manage-post.php'</script>";
                 </div>
 
                  <div class="form-group col-md-6">
-                  <label class="control-label">Price</label>
+                  <label class="control-label">Price (Ksh)</label>
                   <input class="form-control" type="text" name="Price" id="Price" placeholder="Enter your Price" value="<?php echo $result->Price;?>">
                 </div>
                 

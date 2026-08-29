@@ -83,7 +83,7 @@
 	                    <td><?php echo htmlentities(ucfirst($result->frequency));?></td>
 	                    <td><?php echo htmlentities($result->start_date);?></td>
 	                    <td><?php echo htmlentities($result->capacity);?></td>
-	                    <td><?php echo htmlentities($result->price);?></td>
+	                    <td>Ksh <?php echo number_format((float)$result->price, 2);?></td>
 	                    <td><?php echo ($result->status==1) ? 'Active' : 'Inactive';?></td>
 	                    <td>
 	                      <a href="manage-sessions.php?series=<?php echo htmlentities($result->id);?>"><button class="btn btn-info" type="button">Sessions</button></a>

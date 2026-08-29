@@ -101,7 +101,7 @@
 	                    <td><?php echo htmlentities($result->instructor);?></td>
 	                    <td><?php echo htmlentities($result->class_date);?></td>
 	                    <td><?php echo htmlentities($result->duration);?></td>
-	                    <td><?php echo $result->Price;?></td>
+	                    <td>Ksh <?php echo number_format((float)$result->Price, 2);?></td>
 	                    <td><?php echo $result->Description;?></td>
 	                    <td><a href="class-booking-details.php?bookingid=<?php echo htmlentities($result->bookingid);?>"><button class="btn btn-primary" type="button">View</button></td>
 	                  </tr>

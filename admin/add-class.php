@@ -180,7 +180,7 @@
 	                    <td><?php echo htmlentities($result->class_date);?></td>
 	                    <td><?php echo htmlentities($result->duration);?></td>
 	                    <td><?php echo htmlentities($result->capacity);?></td>
-	                    <td><?php echo htmlentities($result->price);?></td>
+	                    <td>Ksh <?php echo number_format((float)$result->price, 2);?></td>
 	                    <td>
 	                      <a href="edit-class.php?cid=<?php echo htmlentities($result->id);?>"><button class="btn btn-primary" type="button">Edit</button></a>
 	                      <a href="add-class.php?del=<?php echo htmlentities($result->id);?>"><button class="btn btn-danger" type="button">Delete</button></a></td>

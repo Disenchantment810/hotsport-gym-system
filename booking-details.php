@@ -101,7 +101,7 @@ on t2.PackageType=t5.id
                    <th>Package Duratiobn</th>
                    <td><?php echo $result->PackageDuratiobn; ?></td>
                     <th>Price</th>
-                    <td><?php echo $result->Price; ?></td>
+                    <td>Ksh <?php echo number_format((float)$result->Price, 2); ?></td>
                     <?php $pricess=$result->Price; ?>
                   </tr>
                   <tr>
@@ -148,7 +148,7 @@ endif;
                   { ?>
 <tr>
   <td><?php echo $result->paymentType; ?></td>
-  <td><?php echo $tpayment=$result->payment; ?></td>
+  <td>Ksh <?php echo $tpayment=$result->payment; ?></td>
   <td><?php echo $result->payment_date; ?></td>
 </tr>
 <?php 
@@ -156,7 +156,7 @@ $gpayment+=$tpayment;
 }  ?>
 <tr>
   <th>Total</th>
-  <th><?php echo $gpayment;?></th>
+  <th>Ksh <?php echo $gpayment;?></th>
 </tr>
 	
 

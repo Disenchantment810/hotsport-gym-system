@@ -74,7 +74,7 @@ if (strlen($_SESSION['adminid']==0)) {
                   <td><?php echo htmlentities($result->PackageName);?></td>
                   <td><?php echo htmlentities($result->titlename);?></td>
                   <td><?php echo htmlentities($result->PackageDuratiobn);?></td>
-                  <td><?php echo htmlentities($result->Price);?></td>
+                  <td>Ksh <?php echo number_format((float)$result->Price, 2);?></td>
                   <?php $id=$result->category_name;?>
                   <td>
 

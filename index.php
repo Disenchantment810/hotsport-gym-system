@@ -94,7 +94,7 @@ echo "<script>window.location.href='Booking-History.php'</script>";
 							<h4><?php echo $result->titlename;?></h4>
 						</div>
 						<div class="pi-price">
-							<h3><?php echo htmlentities($result->Price);?></h3>
+							<h3>Ksh <?php echo number_format((float)$result->Price, 2);?></h3>
 							<p>	<?php echo $result->PackageDuratiobn;?></p>
 						</div>
 						<ul>

@@ -136,7 +136,7 @@
 													<td><?php echo htmlentities($result->class_date);?></td>
 													<td><?php echo htmlentities($result->duration);?></td>
 													<td><?php echo htmlentities($result->capacity);?></td>
-													<td>$<?php echo number_format($result->price, 2);?></td>
+													<td>Ksh <?php echo number_format($result->price, 2);?></td>
 													<td>
 														<form method="post" style="display: inline;">
 															<input type="hidden" name="class_id" value="<?php echo $result->id;?>">

@@ -126,7 +126,7 @@
                 </div>
 
                 <div class="form-group col-md-6">
-                  <label class="control-label">Price ($)</label>
+                  <label class="control-label">Price (Ksh)</label>
                   <input class="form-control" name="price" id="price" type="number" step="0.01" placeholder="Enter Price" value="<?php echo $result->price;?>">
                 </div>
 
