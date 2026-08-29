@@ -48,12 +48,13 @@
 											<th>Trainer</th>
 											<th>Enrolled Date</th>
 											<th>Status</th>
+											<th>Payment</th>
 											<th>Attendance</th>
 										</tr>
 									</thead>
 									<tbody>
 										<?php
-										$sql = "SELECT e.id AS enrollment_id, e.enrolled_date, e.status AS enroll_status, cs.id AS series_id, cs.title, cs.total_sessions, t.name AS trainer_name
+										$sql = "SELECT e.id AS enrollment_id, e.enrolled_date, e.status AS enroll_status, e.payment_status, cs.id AS series_id, cs.title, cs.total_sessions, t.name AS trainer_name
 												FROM tblclass_enrollment e
 												JOIN tblclass_series cs ON cs.id = e.series_id
 												JOIN tbltrainers t ON t.id = cs.trainer_id
@@ -78,12 +79,21 @@
 													<td><?php echo htmlentities($result->trainer_name);?></td>
 													<td><?php echo date('d M Y', strtotime($result->enrolled_date));?></td>
 													<td><?php echo htmlentities(ucfirst($result->enroll_status));?></td>
+													<td>
+														<?php
+														$pst = $result->payment_status;
+														if($pst == 'paid'){ echo '<span class="label label-success">Paid</span>'; }
+														elseif($pst == 'pending'){ echo '<span class="label label-warning">Pending</span>'; }
+														elseif($pst == 'failed'){ echo '<span class="label label-danger">Failed</span>'; }
+														else { echo '<span class="label label-default">'.htmlentities(ucfirst($pst)).'</span>'; }
+														?>
+													</td>
 													<td><?php echo $attended;?> / <?php echo htmlentities($result->total_sessions);?> sessions attended</td>
 												</tr>
 												<?php
 											}
 										} else {
-											echo '<tr><td colspan="5">You have not enrolled in any class series yet. <a href="class-series.php">Browse class series</a></td></tr>';
+											echo '<tr><td colspan="6">You have not enrolled in any class series yet. <a href="class-series.php">Browse class series</a></td></tr>';
 										}
 										?>
 									</tbody>

@@ -1,0 +1,11 @@
+# M-Pesa credentials (never commit)
+mpesa/config.php
+
+# M-Pesa callback logs
+mpesa/logs/
+
+# Composer vendor
+/vendor/
+
+# Editor / OS
+.DS_Store

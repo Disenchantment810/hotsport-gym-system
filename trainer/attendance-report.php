@@ -87,6 +87,7 @@
                   <tr>
                     <th>Member</th>
                     <th>Email</th>
+                    <th>Payment</th>
                     <th>Attended</th>
                     <th>Late</th>
                     <th>Absent</th>
@@ -96,7 +97,7 @@
                 </thead>
                 <tbody>
                 <?php
-                  $sql="SELECT e.id AS enrollment_id, u.fname, u.lname, u.email
+                  $sql="SELECT e.id AS enrollment_id, e.payment_status, u.fname, u.lname, u.email
                         FROM tblclass_enrollment e
                         JOIN tbluser u ON u.id = e.user_id
                         WHERE e.series_id = :series_id ORDER BY u.fname";
@@ -128,6 +129,15 @@
 	                  <tr>
 	                    <td><?php echo htmlentities($result->fname.' '.$result->lname);?></td>
 	                    <td><?php echo htmlentities($result->email);?></td>
+	                    <td>
+	                      <?php
+	                      $pst = $result->payment_status;
+	                      if($pst == 'paid'){ echo '<span class="label label-success">Paid</span>'; }
+	                      elseif($pst == 'pending'){ echo '<span class="label label-warning">Pending</span>'; }
+	                      elseif($pst == 'failed'){ echo '<span class="label label-danger">Failed</span>'; }
+	                      else { echo htmlentities(ucfirst($pst)); }
+	                      ?>
+	                    </td>
 	                    <td><?php echo $attended;?></td>
 	                    <td><?php echo $late;?></td>
 	                    <td><?php echo $absent;?></td>
@@ -135,7 +145,7 @@
 	                    <td><?php echo $pct;?>%</td>
 	                  </tr>
 	                    <?php } } else {
-	                      echo '<tr><td colspan="7">No members enrolled in this series.</td></tr>';
+	                      echo '<tr><td colspan="8">No members enrolled in this series.</td></tr>';
 	                    } ?>
                 </tbody>
               </table>

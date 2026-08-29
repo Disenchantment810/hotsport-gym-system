@@ -18,45 +18,33 @@
 
 	$msg = "";
 	$errormsg = "";
-	if(isset($_POST['enroll']) && $series){
-		// Check not already enrolled
-		$chk = $dbh->prepare("SELECT id FROM tblclass_enrollment WHERE series_id=:series_id AND user_id=:user_id");
-		$chk->bindParam(':series_id',$series_id,PDO::PARAM_INT);
-		$chk->bindParam(':user_id',$user_id,PDO::PARAM_INT);
-		$chk->execute();
-		if($chk->rowCount() > 0){
-			$errormsg = "You have already enrolled in this class series.";
-		} else {
-			// Check capacity (on-demand count)
-			$cnt = $dbh->prepare("SELECT COUNT(*) AS c FROM tblclass_enrollment WHERE series_id=:series_id");
-			$cnt->bindParam(':series_id',$series_id,PDO::PARAM_INT);
-			$cnt->execute();
-			$enrolled = $cnt->fetch(PDO::FETCH_OBJ)->c;
-			if($enrolled >= $series->capacity){
-				$errormsg = "This class series is full.";
-			} else {
-				$ins = $dbh->prepare("INSERT INTO tblclass_enrollment (series_id, user_id) VALUES (:series_id, :user_id)");
-				$ins->bindParam(':series_id',$series_id,PDO::PARAM_INT);
-				$ins->bindParam(':user_id',$user_id,PDO::PARAM_INT);
-				$ins->execute();
-				if($dbh->lastInsertId() > 0){
-					$msg = "You have successfully enrolled in this class series.";
-				} else {
-					$errormsg = "Enrollment failed. Please try again.";
-				}
-			}
-		}
-	}
 
-	// Re-check enrollment status after any action
-	$is_enrolled = false;
+	// Load the member's enrollment (if any) and its payment status
+	$enrollment = null;
+	$payment = null;
 	if($series){
-		$chk2 = $dbh->prepare("SELECT id FROM tblclass_enrollment WHERE series_id=:series_id AND user_id=:user_id");
+		$chk2 = $dbh->prepare("SELECT * FROM tblclass_enrollment WHERE series_id=:series_id AND user_id=:user_id");
 		$chk2->bindParam(':series_id',$series_id,PDO::PARAM_INT);
 		$chk2->bindParam(':user_id',$user_id,PDO::PARAM_INT);
 		$chk2->execute();
-		$is_enrolled = ($chk2->rowCount() > 0);
+		$enrollment = $chk2->fetch(PDO::FETCH_OBJ);
+
+		if($enrollment){
+			$psql = $dbh->prepare("SELECT * FROM tblclass_enrollment_payments WHERE enrollment_id=:enrollment_id ORDER BY id DESC LIMIT 1");
+			$psql->bindParam(':enrollment_id',$enrollment->id,PDO::PARAM_INT);
+			$psql->execute();
+			$payment = $psql->fetch(PDO::FETCH_OBJ);
+		}
 	}
+	$is_enrolled = ($enrollment !== false && $enrollment !== null);
+	$payment_status = $enrollment ? $enrollment->payment_status : 'none';
+	// Load profile mobile as a convenience placeholder
+	$profile_mobile = "";
+	$mob = $dbh->prepare("SELECT mobile FROM tbluser WHERE id=:id");
+	$mob->bindParam(':id',$user_id,PDO::PARAM_INT);
+	$mob->execute();
+	$mrow = $mob->fetch(PDO::FETCH_OBJ);
+	if($mrow){ $profile_mobile = $mrow->mobile; }
 	?>
 <!DOCTYPE html>
 <html lang="zxx">
@@ -112,9 +100,35 @@
 							<p><strong>Enrolled:</strong> <?php echo $enrolled;?> / <?php echo htmlentities($series->capacity);?></p>
 
 							<?php if(!$is_enrolled){ ?>
-								<form method="post" style="margin-bottom:20px;">
-									<button type="submit" name="enroll" class="btn btn-primary">Enroll in this Series</button>
-								</form>
+								<!-- Pay & Enroll flow -->
+								<div id="enrollBox">
+									<form id="payEnrollForm" method="post" style="margin-bottom:20px;">
+										<div class="form-group">
+											<label class="control-label">Enter M-Pesa Phone Number (e.g. 07XXXXXXXX)</label>
+											<input class="form-control" type="text" name="phone" id="phone" placeholder="07XXXXXXXX" value="<?php echo htmlentities($profile_mobile);?>">
+										</div>
+										<button type="submit" name="pay_enroll" class="btn btn-primary">Pay &amp; Enroll</button>
+									</form>
+								</div>
+								<div id="payResult" style="display:none;"></div>
+							<?php } elseif($payment_status == 'paid'){ ?>
+								<div class="alert alert-success">
+									<strong>Payment Successful — You're Enrolled</strong>
+									<p>Amount: Ksh <?php echo number_format((float)$series->price, 2);?>
+									<?php if($payment && $payment->transaction_receipt){ ?> | M-Pesa Receipt: <strong><?php echo htmlentities($payment->transaction_receipt);?></strong><?php } ?></p>
+								</div>
+							<?php } elseif($payment_status == 'pending'){ ?>
+								<div class="alert alert-warning">
+									<strong>Payment Pending</strong>
+									<p>Please check your phone and enter your M-Pesa PIN to complete payment. Your enrollment will be confirmed once payment is received.</p>
+									<button type="button" class="btn btn-info" id="checkStatusBtn">Check Payment Status</button>
+								</div>
+								<div id="payResult" style="display:none;"></div>
+							<?php } elseif($payment_status == 'failed'){ ?>
+								<div class="alert alert-danger">
+									<strong>Payment Failed</strong>
+									<p>Your payment was not completed. Please try enrolling again.</p>
+								</div>
 							<?php } else { ?>
 								<span class="label label-success" style="font-size:14px;">You are enrolled in this series</span>
 							<?php } ?>
@@ -171,5 +185,75 @@
 	<script src="js/jquery-ui.min.js"></script>
 	<script src="js/jquery.magnific-popup.min.js"></script>
 	<script src="js/main.js"></script>
+	<script>
+	$(document).ready(function(){
+		var seriesId = <?php echo $series_id;?>;
+		var enrollmentId = <?php echo $enrollment ? $enrollment->id : 0;?>;
+
+		// Pay & Enroll
+		$('#payEnrollForm').on('submit', function(e){
+			e.preventDefault();
+			var phone = $('#phone').val();
+			$('#payResult').show().html('<div class="alert alert-info">Initiating payment... please wait.</div>');
+			$.post('mpesa/initiate.php', {series_id: seriesId, phone: phone}, function(res){
+				if(res.success){
+					$('#enrollBox').hide();
+					$('#payResult').html(
+						'<div class="alert alert-warning">' +
+						'<strong>Payment Pending</strong>' +
+						'<p>Please check your phone and enter your M-Pesa PIN to complete payment. Your enrollment will be confirmed once payment is received.</p>' +
+						'<button type="button" class="btn btn-info" id="checkStatusBtn">Check Payment Status</button>' +
+						'</div>'
+					);
+					enrollmentId = res.enrollment_id;
+					bindCheckStatus();
+				} else {
+					$('#payResult').html('<div class="alert alert-danger">' + res.message + '</div>');
+				}
+			}, 'json').fail(function(){
+				$('#payResult').html('<div class="alert alert-danger">Could not reach the payment service. Please try again.</div>');
+			});
+		});
+
+		function bindCheckStatus(){
+			$('#checkStatusBtn').on('click', function(){
+				$(this).prop('disabled', true).text('Checking...');
+				$.get('mpesa/status.php', {enrollment_id: enrollmentId}, function(res){
+					if(res.success){
+						if(res.status == 'paid'){
+							$('#payResult').html(
+								'<div class="alert alert-success">' +
+								'<strong>Payment Successful — You\'re Enrolled</strong>' +
+								'<p>Amount: Ksh ' + Number(res.amount).toLocaleString(undefined, {minimumFractionDigits:2}) +
+								(res.receipt ? ' | M-Pesa Receipt: <strong>' + res.receipt + '</strong>' : '') + '</p>' +
+								'</div>'
+							);
+						} else if(res.status == 'failed'){
+							$('#payResult').html('<div class="alert alert-danger"><strong>Payment Failed</strong><p>Your payment was not completed. Please try enrolling again.</p></div>');
+						} else {
+							$('#payResult').html(
+								'<div class="alert alert-warning">' +
+								'<strong>Payment Pending</strong>' +
+								'<p>Payment has not been confirmed yet. Please check your phone and enter your M-Pesa PIN, then check again.</p>' +
+								'<button type="button" class="btn btn-info" id="checkStatusBtn">Check Payment Status</button>' +
+								'</div>'
+							);
+							bindCheckStatus();
+						}
+					} else {
+						$('#payResult').html('<div class="alert alert-danger">' + res.message + '</div>');
+					}
+				}, 'json').always(function(){
+					$('#checkStatusBtn').prop('disabled', false).text('Check Payment Status');
+				});
+			});
+		}
+
+		// Bind if already pending on page load
+		if(enrollmentId > 0 && $('#checkStatusBtn').length){
+			bindCheckStatus();
+		}
+	});
+	</script>
 </body>
 </html>
