@@ -15,7 +15,7 @@ This is a Gym Management System built with PHP and MySQL. The system allows user
 - `img/` - Images used in the system
 - `screen/` - Screenshots of the system (as referenced in README)
 - `SQL File/` - Contains the database dump (`gym_codecampbd.sql`)
-- Root directory - User-facing pages (index.php, about.php, booking-details.php, etc.)
+- Root directory - User-facing pages (index.php, about.php, payment-history.php, etc.)
 
 ## Database Setup
 
@@ -28,7 +28,7 @@ This is a Gym Management System built with PHP and MySQL. The system allows user
 2. To set up the database:
    - Import the SQL file located at `SQL File/gym_codecampbd.sql` into MySQL.
    - The expected database name is `gym_codecampbd` (as per config) but note the README mentions `ccbd_medipos` - this appears to be a discrepancy; the config uses `gym_codecampbd`.
-   - The SQL file now includes the `tblattendance` table for attendance tracking (added via the attendance feature implementation) and the `tblclass` and `tblclassbooking` tables for class scheduling and booking.
+   - The SQL file now includes the `tblattendance` table for attendance tracking (added via the attendance feature implementation).
 
 ## Implemented Features
 
@@ -42,12 +42,12 @@ This is a Gym Management System built with PHP and MySQL. The system allows user
   - User header includes "Attendance History" link for logged-in members
 
 ### Class Scheduling & Booking System
-- **Admin Class Management**: Administrators can create, edit, delete, and view fitness classes (e.g., yoga, spinning, HIIT) with schedules, instructors, capacity limits, and pricing.
-- **User Class Booking**: Logged-in members can browse upcoming classes via calendar/list view, book classes (subject to capacity), and view their class booking history.
-- **Database**: Added `tblclass` (class details) and `tblclassbooking` (bookings) tables with foreign keys to `tbluser`.
+- **Trainer Class Series**: Trainers create class series (training sessions) with sessions, capacity, and pricing.
+- **User Enrollment via M-Pesa**: Logged-in members enroll in class series and pay via M-Pesa STK Push.
+- **Database**: Added `tblclass_series`, `tblclass_sessions`, `tblclass_enrollment`, `tblclass_attendance`, `tblcertificates` tables.
 - **Integration**: 
-  - Admin sidebar includes "Class Management" menu with Add Class and Manage Class options.
-  - User header includes "Classes" link for logged-in members.
+  - Trainer sidebar includes "Class Series" menu with Add Series, Manage Series, and Payments options.
+  - User header includes "Class Series" link for logged-in members.
   - Uses existing FullCalendar assets for calendar view.
   - Follows same patterns as package booking (PDO prepared statements, session authentication, Bootstrap styling, alert feedback).
 

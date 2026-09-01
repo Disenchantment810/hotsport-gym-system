@@ -30,7 +30,7 @@
 		$enrollment = $chk2->fetch(PDO::FETCH_OBJ);
 
 		if($enrollment){
-			$psql = $dbh->prepare("SELECT * FROM tblclass_enrollment_payments WHERE enrollment_id=:enrollment_id ORDER BY id DESC LIMIT 1");
+			$psql = $dbh->prepare("SELECT * FROM tblpayments WHERE payment_type='class_series' AND reference_id=:enrollment_id ORDER BY id DESC LIMIT 1");
 			$psql->bindParam(':enrollment_id',$enrollment->id,PDO::PARAM_INT);
 			$psql->execute();
 			$payment = $psql->fetch(PDO::FETCH_OBJ);
@@ -195,7 +195,7 @@
 			e.preventDefault();
 			var phone = $('#phone').val();
 			$('#payResult').show().html('<div class="alert alert-info">Initiating payment... please wait.</div>');
-			$.post('mpesa/initiate.php', {series_id: seriesId, phone: phone}, function(res){
+			$.post('mpesa/initiate.php', {payment_type: 'class_series', reference_id: seriesId, phone: phone}, function(res){
 				if(res.success){
 					$('#enrollBox').hide();
 					$('#payResult').html(
@@ -205,7 +205,7 @@
 						'<button type="button" class="btn btn-info" id="checkStatusBtn">Check Payment Status</button>' +
 						'</div>'
 					);
-					enrollmentId = res.enrollment_id;
+					enrollmentId = res.reference_id;
 					bindCheckStatus();
 				} else {
 					$('#payResult').html('<div class="alert alert-danger">' + res.message + '</div>');
@@ -218,7 +218,7 @@
 		function bindCheckStatus(){
 			$('#checkStatusBtn').on('click', function(){
 				$(this).prop('disabled', true).text('Checking...');
-				$.get('mpesa/status.php', {enrollment_id: enrollmentId}, function(res){
+				$.get('mpesa/status.php', {payment_type: 'class_series', reference_id: enrollmentId}, function(res){
 					if(res.success){
 						if(res.status == 'paid'){
 							$('#payResult').html(

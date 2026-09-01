@@ -104,18 +104,18 @@ if (strlen($_SESSION['adminid']==0)) {
 
         <div class="col-md-6 col-lg-6">
           <?php
-                  $sql="SELECT count(id) as totalbookings FROM tblbooking;";
+                  $sql="SELECT count(id) as totalpayments FROM tblpayments WHERE status='SUCCESS';";
                   $query= $dbh->prepare($sql);
                   $query-> execute();
                   $results = $query -> fetchAll(PDO::FETCH_OBJ);
                   foreach($results as $result)
                   {
                   ?>
-                  <a href="booking-history.php"> 
-          <div class="widget-small info coloured-icon"><i class="icon fa fa-users fa-3x"></i>
+                  <a href="payment-report.php"> 
+          <div class="widget-small info coloured-icon"><i class="icon fa fa-money fa-3x"></i>
             <div class="info">
-              <h4>Total Bookings</h4>
-              <p><b><?php echo $result->totalbookings;?></b></p>
+              <h4>Total Payments</h4>
+              <p><b><?php echo $result->totalpayments;?></b></p>
             </div>
           </div>
         </a>
@@ -124,18 +124,18 @@ if (strlen($_SESSION['adminid']==0)) {
 	
     <div class="col-md-6 col-lg-6">
           <?php
-                  $sql="SELECT count(id) as totalbookings FROM tblbooking where  paymentType is null or paymentType=''";
+                  $sql="SELECT count(id) as activesubs FROM tblsubscriptions where status='active'";
                   $query= $dbh->prepare($sql);
                   $query-> execute();
                   $results = $query -> fetchAll(PDO::FETCH_OBJ);
                   foreach($results as $result)
                   {
                   ?>
-                  <a href="new-bookings.php"> 
+                  <a href="payment-report.php?type=package"> 
           <div class="widget-small danger coloured-icon"><i class="icon fa fa-user fa-3x"></i>
             <div class="info">
-              <h4>New Bookings</h4>
-              <p><b><?php echo $result->totalbookings;?></b></p>
+              <h4>Active Subscriptions</h4>
+              <p><b><?php echo $result->activesubs;?></b></p>
             </div>
           </div>
         </a>
@@ -145,18 +145,18 @@ if (strlen($_SESSION['adminid']==0)) {
 	
     <div class="col-md-6 col-lg-6">
           <?php
-                  $sql="SELECT count(id) as totalbookings FROM tblbooking where paymentType='Partial Payment'";
+                  $sql="SELECT count(id) as pendingpay FROM tblpayments where status='PENDING'";
                   $query= $dbh->prepare($sql);
                   $query-> execute();
                   $results = $query -> fetchAll(PDO::FETCH_OBJ);
                   foreach($results as $result)
                   {
                   ?>
-                  <a href="partial-payment-bookings.php"> 
-          <div class="widget-small warning coloured-icon"><i class="icon fa fa-user fa-3x"></i>
+                  <a href="payment-report.php"> 
+          <div class="widget-small warning coloured-icon"><i class="icon fa fa-clock-o fa-3x"></i>
             <div class="info">
-              <h4>Partial Payment Bookings</h4>
-              <p><b><?php echo $result->totalbookings;?></b></p>
+              <h4>Pending Payments</h4>
+              <p><b><?php echo $result->pendingpay;?></b></p>
             </div>
           </div>
         </a>
@@ -166,18 +166,18 @@ if (strlen($_SESSION['adminid']==0)) {
 	
          <div class="col-md-6 col-lg-6">
           <?php
-                  $sql="SELECT count(id) as totalbookings FROM tblbooking where paymentType='Full Payment'";
+                  $sql="SELECT COALESCE(SUM(amount),0) as totalrevenue FROM tblpayments where status='SUCCESS'";
                   $query= $dbh->prepare($sql);
                   $query-> execute();
                   $results = $query -> fetchAll(PDO::FETCH_OBJ);
                   foreach($results as $result)
                   {
                   ?>
-                  <a href="full-payment-bookings.php"> 
-          <div class="widget-small primary coloured-icon"><i class="icon fa fa-user fa-3x"></i>
+                  <a href="payment-report.php"> 
+          <div class="widget-small primary coloured-icon"><i class="icon fa fa-line-chart fa-3x"></i>
             <div class="info">
-              <h4>Full Payment Bookings</h4>
-              <p><b><?php echo $result->totalbookings;?></b></p>
+              <h4>Total Revenue (Ksh)</h4>
+              <p><b><?php echo number_format((float)$result->totalrevenue, 2);?></b></p>
             </div>
           </div>
         </a>

@@ -6,6 +6,7 @@
           <ul class="treeview-menu">
             <li><a class="treeview-item" href="add-series.php"><i class="icon fa fa-circle-o"></i> Add Series</a></li>
             <li><a class="treeview-item" href="manage-series.php"><i class="icon fa fa-circle-o"></i> Manage Series</a></li>
+            <li><a class="treeview-item" href="payment-report.php"><i class="icon fa fa-circle-o"></i> Payments</a></li>
           </ul>
         </li>
 

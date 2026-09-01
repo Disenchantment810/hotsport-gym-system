@@ -3,23 +3,6 @@ session_start();
 error_reporting(0);
 include 'include/config.php';
 $uid=$_SESSION['uid'];
-
-if(isset($_POST['submit']))
-{ 
-$pid=$_POST['pid'];
-
-
-$sql="INSERT INTO tblbooking (package_id,userid) Values(:pid,:uid)";
-
-$query = $dbh -> prepare($sql);
-$query->bindParam(':pid',$pid,PDO::PARAM_STR);
-$query->bindParam(':uid',$uid,PDO::PARAM_STR);
-$query -> execute();
-echo "<script>alert('Package has been booked.');</script>";
-echo "<script>window.location.href='Booking-History.php'</script>";
-
-}
-
 ?>
 <!DOCTYPE html>
 <html lang="zxx">

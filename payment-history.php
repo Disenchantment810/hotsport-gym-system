@@ -11,7 +11,7 @@ $uid=$_SESSION['uid'];
 <!DOCTYPE html>
 <html lang="zxx">
 <head>
-	<title>User | Booking History</title>
+	<title>User | Payment History</title>
 	<meta charset="UTF-8">
 	<meta name="description" content="Ahana Yoga HTML Template">
 	<meta name="keywords" content="yoga, html">
@@ -40,7 +40,7 @@ $uid=$_SESSION['uid'];
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-7 m-auto text-white">
-					<h2>Booking History</h2>
+					<h2>Payment History</h2>
 					
 				</div>
 			</div>
@@ -59,62 +59,52 @@ $uid=$_SESSION['uid'];
     <thead>
       <tr>
         <th>Sr.No</th>
-        <th hidden>bookingid</th>
-        <th hidden>Name</th>
-        <th hidden>email</th>
-        <th>bookingdate</th>
-        <th>title</th>
-        <th>PackageDuratiobn</th>
-        <th>price</th>
-        <th>Description</th>
-        <th>category_name</th>
-        <th>PackageName</th>
+        <th>Date</th>
+        <th>Item</th>
+        <th>Type</th>
+        <th>Amount</th>
+        <th>M-Pesa Receipt</th>
+        <th>Status</th>
         <th>Action</th>
-
-
       </tr>
     </thead>
           <?php
-          $uid=$_SESSION['uid'];
-                  /*$sql="select id, product_id, userid, product_title, packages, category, PackageDuratiobn, price, descripation, booking_date from tblbooking where userid=:uid";*/
-                  $sql="SELECT t1.id as bookingid,t3.fname as Name, t3.email as email,t1.booking_date as bookingdate,t2.titlename as title,t2.PackageDuratiobn as PackageDuratiobn,
-t2.Price as Price,t2.Description as Description,t4.category_name as category_name,t5.PackageName as PackageName FROM tblbooking as t1
- join tbladdpackage as t2
-on t1.package_id =t2.id
-join tbluser as t3
-on t1.userid=t3.id
-join tblcategory as t4
-on t2.category=t4.id
-join tblpackage as t5
-on t2.PackageType=t5.id
-where t1.userid=:uid";
-                  $query= $dbh->prepare($sql);
-                  $query->bindParam(':uid',$uid, PDO::PARAM_STR);
-                  $query-> execute();
-                  $results = $query -> fetchAll(PDO::FETCH_OBJ);
-                  $cnt=1;
-                  if($query -> rowCount() > 0)
-                  {
-                  foreach($results as $result)
-                  {
-                  ?>
+          $sql="SELECT p.*,
+                CASE p.payment_type
+                  WHEN 'package' THEN (SELECT titlename FROM tbladdpackage WHERE id = p.reference_id)
+                  WHEN 'class_series' THEN (SELECT title FROM tblclass_series WHERE id = (SELECT series_id FROM tblclass_enrollment WHERE id = p.reference_id))
+                END AS item_name
+                FROM tblpayments p
+                WHERE p.user_id = :uid
+                ORDER BY p.id DESC";
+          $query= $dbh->prepare($sql);
+          $query->bindParam(':uid',$uid, PDO::PARAM_STR);
+          $query-> execute();
+          $results = $query -> fetchAll(PDO::FETCH_OBJ);
+          $cnt=1;
+          if($query -> rowCount() > 0)
+          {
+          foreach($results as $result)
+          {
+            $typeLabel = ($result->payment_type == 'package') ? 'Package' : 'Trainer Session';
+            $statusLabel = ucfirst(strtolower($result->status));
+            $badge = ($result->status == 'SUCCESS') ? 'success' : (($result->status == 'PENDING') ? 'warning' : 'danger');
+          ?>
 	
                 <tbody>
                   <tr>
                     <td><?php echo($cnt);?></td>
-                    <td hidden><?php echo htmlentities($result->bookingid);?></td>
-                    <td hidden><?php echo htmlentities($result->Name);?></td>
-                    <td hidden><?php echo htmlentities($result->email);?></td>
-                    <td><?php echo htmlentities($result->bookingdate);?></td>
-                    <td><?php echo htmlentities($result->title);?></td>
-                    <td><?php echo htmlentities($result->PackageDuratiobn);?></td>
-                    <td>Ksh <?php echo number_format((float)$result->Price, 2);?></td>
-                    <td><?php echo $result->Description;?></td>
-                    <td><?php echo htmlentities($result->category_name);?></td>
-                    <td><?php echo htmlentities($result->PackageName);?></td>
-                    <td><a href="booking-details.php?bookingid=<?php echo htmlentities($result->bookingid);?>"><button class="btn btn-primary" type="button">View</button></td>
+                    <td><?php echo date('d M Y, H:i', strtotime($result->created_at));?></td>
+                    <td><?php echo htmlentities($result->item_name);?></td>
+                    <td><?php echo $typeLabel;?></td>
+                    <td>Ksh <?php echo number_format((float)$result->amount, 2);?></td>
+                    <td><?php echo $result->transaction_receipt ? htmlentities($result->transaction_receipt) : '-';?></td>
+                    <td><span class="badge badge-<?php echo $badge;?>"><?php echo $statusLabel;?></span></td>
+                    <td><a href="payment-receipt.php?id=<?php echo htmlentities($result->id);?>"><button class="btn btn-primary" type="button">Receipt</button></a></td>
                   </tr>
-                    <?php  $cnt=$cnt+1; } } ?>
+                    <?php  $cnt=$cnt+1; } } else { ?>
+                    <tr><td colspan="8" class="text-center">No payments found.</td></tr>
+                    <?php } ?>
               
                 </tbody>
   </table>
@@ -165,4 +155,4 @@ where t1.userid=:uid";
     box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
 }
         </style>
-        <?php } ?>	
+        <?php } ?>

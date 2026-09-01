@@ -54,8 +54,7 @@
 					<?php if(strlen($_SESSION['uid'])==0): ?>
 			<li><a href="admin/">Admin</a></li>
 					<?php else :?>
-						<li><a href="Booking-History.php">Booking History</a></li>
-							<li><a href="classes.php">Classes</a></li>
+						<li><a href="payment-history.php">Payment History</a></li>
 							<li><a href="class-series.php">Class Series</a></li>
 							<li><a href="my-enrollments.php">My Enrollments</a></li>
 							<li><a href="attendance-history.php">Attendance History</a></li>

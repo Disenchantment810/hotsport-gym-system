@@ -3,23 +3,6 @@ session_start();
 error_reporting(0);
 include 'include/config.php';
 $uid=$_SESSION['uid'];
-
-if(isset($_POST['submit']))
-{ 
-$pid=$_POST['pid'];
-
-
-$sql="INSERT INTO tblbooking (package_id,userid) Values(:pid,:uid)";
-
-$query = $dbh -> prepare($sql);
-$query->bindParam(':pid',$pid,PDO::PARAM_STR);
-$query->bindParam(':uid',$uid,PDO::PARAM_STR);
-$query -> execute();
-echo "<script>alert('Package has been booked.');</script>";
-echo "<script>window.location.href='Booking-History.php'</script>";
-
-}
-
 ?>
 <!DOCTYPE html>
 <html lang="zxx">
@@ -102,16 +85,28 @@ echo "<script>window.location.href='Booking-History.php'</script>";
 							
 						</ul>
 						<?php if(strlen($_SESSION['uid'])==0): ?>
-						<a href="login.php" class="site-btn sb-line-gradient">Booking Now</a>
+						<a href="login.php" class="site-btn sb-line-gradient">Subscribe</a>
 						<?php else :?>
-							<!-- <a href="#" class="site-btn sb-line-gradient">Booking Now</a> -->
-							 <form method='post'>
-                            <input type='hidden' name='pid' value='<?php echo htmlentities($result->id);?>'>
-                          
-
-                        <input class='site-btn sb-line-gradient' type='submit' name='submit' value='Booking Now' onclick="return confirm('Do you really want to book this package.');"> 
-                        </form> 
-							 <?php endif;?>
+							<?php
+							$sub = $dbh->prepare("SELECT status, payment_status FROM tblsubscriptions WHERE package_id=:pid AND user_id=:uid ORDER BY id DESC LIMIT 1");
+							$sub->bindParam(':pid',$result->id,PDO::PARAM_INT);
+							$sub->bindParam(':uid',$uid,PDO::PARAM_INT);
+							$sub->execute();
+							$subrow = $sub->fetch(PDO::FETCH_OBJ);
+							$sub_status = $subrow ? $subrow->status : 'none';
+							$pay_status = $subrow ? $subrow->payment_status : 'none';
+							?>
+							<?php if($sub_status == 'active'): ?>
+								<span class="site-btn sb-line-gradient" style="cursor:default;">Subscribed</span>
+							<?php elseif($sub_status == 'pending'): ?>
+								<span class="site-btn sb-line-gradient" style="cursor:default;">Payment Pending</span>
+							<?php else: ?>
+								<button type="button" class="site-btn sb-line-gradient pay-subscribe-btn"
+									data-package-id="<?php echo htmlentities($result->id);?>"
+									data-package-name="<?php echo htmlentities($result->titlename);?>"
+									data-price="<?php echo htmlentities($result->Price);?>">Pay &amp; Subscribe</button>
+							<?php endif;?>
+						<?php endif;?>
 					</div>
 				</div>
 				<?php  $cnt=$cnt+1; } } ?>
@@ -138,6 +133,113 @@ echo "<script>window.location.href='Booking-History.php'</script>";
 	<script src="js/jquery-ui.min.js"></script>
 	<script src="js/jquery.magnific-popup.min.js"></script>
 	<script src="js/main.js"></script>
+
+	<!-- M-Pesa Pay & Subscribe Modal -->
+	<div class="modal fade" id="payModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Pay &amp; Subscribe</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<p><strong id="payPkgName"></strong></p>
+					<p>Amount: <strong>Ksh <span id="payPkgPrice"></span></strong></p>
+					<div class="form-group">
+						<label class="control-label">Enter M-Pesa Phone Number (e.g. 07XXXXXXXX)</label>
+						<input class="form-control" type="text" id="payPhone" placeholder="07XXXXXXXX">
+					</div>
+					<div id="payResult"></div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary" id="payBtn">Pay Now</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+	$(document).ready(function(){
+		var currentPackageId = 0;
+		var currentRefId = 0;
+
+		$('.pay-subscribe-btn').on('click', function(){
+			currentPackageId = $(this).data('package-id');
+			$('#payPkgName').text($(this).data('package-name'));
+			$('#payPkgPrice').text(Number($(this).data('price')).toLocaleString(undefined, {minimumFractionDigits:2}));
+			$('#payPhone').val('');
+			$('#payResult').html('');
+			$('#payBtn').prop('disabled', false).text('Pay Now');
+			$('#payModal').modal('show');
+		});
+
+		$('#payBtn').on('click', function(){
+			var phone = $('#payPhone').val();
+			if(!phone){
+				$('#payResult').html('<div class="alert alert-danger">Please enter your M-Pesa phone number.</div>');
+				return;
+			}
+			$(this).prop('disabled', true).text('Initiating...');
+			$('#payResult').html('<div class="alert alert-info">Initiating payment... please wait.</div>');
+			$.post('mpesa/initiate.php', {payment_type: 'package', reference_id: currentPackageId, phone: phone}, function(res){
+				if(res.success){
+					currentRefId = res.reference_id;
+					$('#payResult').html(
+						'<div class="alert alert-warning">' +
+						'<strong>Payment Pending</strong>' +
+						'<p>Please check your phone and enter your M-Pesa PIN to complete payment. Your subscription will be activated once payment is received.</p>' +
+						'<button type="button" class="btn btn-info" id="checkStatusBtn">Check Payment Status</button>' +
+						'</div>'
+					);
+					bindCheckStatus();
+				} else {
+					$('#payResult').html('<div class="alert alert-danger">' + res.message + '</div>');
+					$('#payBtn').prop('disabled', false).text('Pay Now');
+				}
+			}, 'json').fail(function(){
+				$('#payResult').html('<div class="alert alert-danger">Could not reach the payment service. Please try again.</div>');
+				$('#payBtn').prop('disabled', false).text('Pay Now');
+			});
+		});
+
+		function bindCheckStatus(){
+			$('#checkStatusBtn').on('click', function(){
+				$(this).prop('disabled', true).text('Checking...');
+				$.get('mpesa/status.php', {payment_type: 'package', reference_id: currentRefId}, function(res){
+					if(res.success){
+						if(res.status == 'paid'){
+							$('#payResult').html(
+								'<div class="alert alert-success">' +
+								'<strong>Payment Successful — Subscription Active</strong>' +
+								'<p>Amount: Ksh ' + Number(res.amount).toLocaleString(undefined, {minimumFractionDigits:2}) +
+								(res.receipt ? ' | M-Pesa Receipt: <strong>' + res.receipt + '</strong>' : '') + '</p>' +
+								'</div>'
+							);
+							$('#payBtn').prop('disabled', true).text('Subscribed');
+						} else if(res.status == 'failed'){
+							$('#payResult').html('<div class="alert alert-danger"><strong>Payment Failed</strong><p>Your payment was not completed. Please try subscribing again.</p></div>');
+							$('#payBtn').prop('disabled', false).text('Pay Now');
+						} else {
+							$('#payResult').html(
+								'<div class="alert alert-warning">' +
+								'<strong>Payment Pending</strong>' +
+								'<p>Payment has not been confirmed yet. Please check your phone and enter your M-Pesa PIN, then check again.</p>' +
+								'<button type="button" class="btn btn-info" id="checkStatusBtn">Check Payment Status</button>' +
+								'</div>'
+							);
+							bindCheckStatus();
+						}
+					} else {
+						$('#payResult').html('<div class="alert alert-danger">' + res.message + '</div>');
+					}
+				}, 'json').always(function(){
+					$('#checkStatusBtn').prop('disabled', false).text('Check Payment Status');
+				});
+			});
+		}
+	});
+	</script>
 	
 	</body>
 </html>
