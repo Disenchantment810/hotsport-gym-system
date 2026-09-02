@@ -5,6 +5,17 @@ if (strlen($_SESSION['adminid']==0)) {
   header('location:logout.php');
   } else{
 
+//Soft Delete Record Data
+if(isset($_REQUEST['del']))
+{
+$uid=intval($_GET['del']);
+$sql = "update tbladdpackage set is_deleted=1 WHERE id=:id";
+$query = $dbh->prepare($sql);
+$query-> bindParam(':id',$uid, PDO::PARAM_STR);
+$query -> execute();
+echo "<script>alert('Package deleted successfully');</script>";
+echo "<script>window.location.href='manage-post.php'</script>";
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -52,10 +63,11 @@ if (strlen($_SESSION['adminid']==0)) {
                    <?php
                    include  'include/config.php';
                   $sql="SELECT t1.id as packageid,t2.*,t3.*,t1.* FROM tbladdpackage as t1
-                    join tblcategory as t2
+                    left join tblcategory as t2
                     on t1.category=t2.id
-                    join tblpackage as t3
-                    on t1.PackageType=t3.id";
+                    left join tblpackage as t3
+                    on t1.PackageType=t3.id
+                    WHERE t1.is_deleted=0";
                   $query= $dbh->prepare($sql);
   
                   $query-> execute();
@@ -78,7 +90,8 @@ if (strlen($_SESSION['adminid']==0)) {
                   <?php $id=$result->category_name;?>
                   <td>
 
-                   <a href="edit-post.php?pid=<?php echo htmlentities($result->packageid);?>"><span class="btn btn-success">Edit</span></td>
+                   <a href="edit-post.php?pid=<?php echo htmlentities($result->packageid);?>"><span class="btn btn-success">Edit</span></a>
+                   <a href="manage-post.php?del=<?php echo htmlentities($result->packageid);?>" onclick="return confirm('Delete this package?');"><span class="btn btn-danger">Delete</span></a>
                   </tr>
                    
                  

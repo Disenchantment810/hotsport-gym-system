@@ -36,7 +36,8 @@ CREATE TABLE `tbladdpackage` (
   `Price` varchar(45) DEFAULT NULL,
   `uploadphoto` varchar(450) DEFAULT NULL,
   `Description` varchar(450) DEFAULT NULL,
-  `create_date` timestamp NULL DEFAULT current_timestamp()
+  `create_date` timestamp NULL DEFAULT current_timestamp(),
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0=active, 1=deleted'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

@@ -61,7 +61,7 @@ $uid=$_SESSION['uid'];
 			<div class="row">
 				        <?php 
 
-						$sql ="SELECT id, category, titlename, PackageType, PackageDuratiobn, Price, uploadphoto, Description, create_date from tbladdpackage";
+						$sql ="SELECT t1.id, t1.category, t1.titlename, t1.PackageType, t1.PackageDuratiobn, t1.Price, t1.uploadphoto, t1.Description, t1.create_date from tbladdpackage as t1 join tblpackage as t3 on t1.PackageType=t3.id WHERE t1.is_deleted=0";
 						$query= $dbh -> prepare($sql);
 						$query-> execute();
 						$results = $query -> fetchAll(PDO::FETCH_OBJ);

@@ -133,4 +133,16 @@ try {
 } catch (PDOException $e) {
     echo "Error creating tblworkout_exercises: " . $e->getMessage() . "\n";
 }
+
+// Add is_deleted column to tbladdpackage (idempotent) for soft-delete support
+$col = $dbh->query("SELECT COUNT(*) AS c FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tbladdpackage' AND COLUMN_NAME = 'is_deleted'");
+$exists = $col->fetch(PDO::FETCH_OBJ)->c;
+if ($exists == 0) {
+    $dbh->exec("ALTER TABLE `tbladdpackage`
+        ADD COLUMN `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0=active, 1=deleted'");
+    echo "Added is_deleted column to tbladdpackage.\n";
+} else {
+    echo "is_deleted column already exists.\n";
+}
 ?>
