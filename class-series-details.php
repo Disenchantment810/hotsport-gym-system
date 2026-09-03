@@ -129,6 +129,16 @@
 									<strong>Payment Failed</strong>
 									<p>Your payment was not completed. Please try enrolling again.</p>
 								</div>
+								<div id="enrollBox">
+									<form id="payEnrollForm" method="post" style="margin-bottom:20px;">
+										<div class="form-group">
+											<label class="control-label">Enter M-Pesa Phone Number (e.g. 07XXXXXXXX)</label>
+											<input class="form-control" type="text" name="phone" id="phone" placeholder="07XXXXXXXX" value="<?php echo htmlentities($profile_mobile);?>">
+										</div>
+										<button type="submit" name="pay_enroll" class="btn btn-primary">Pay &amp; Enroll</button>
+									</form>
+								</div>
+								<div id="payResult" style="display:none;"></div>
 							<?php } else { ?>
 								<span class="label label-success" style="font-size:14px;">You are enrolled in this series</span>
 							<?php } ?>

@@ -106,12 +106,12 @@ if ($status == 'pending' && $pay && $pay->checkout_request_id) {
             $upd->execute();
 
             if ($payment_type == 'package') {
-                $upd2 = $dbh->prepare("UPDATE tblsubscriptions SET payment_status = 'failed' WHERE id = :id");
+                $del2 = $dbh->prepare("DELETE FROM tblsubscriptions WHERE id = :id");
             } else {
-                $upd2 = $dbh->prepare("UPDATE tblclass_enrollment SET payment_status = 'failed' WHERE id = :id");
+                $del2 = $dbh->prepare("DELETE FROM tblclass_enrollment WHERE id = :id");
             }
-            $upd2->bindParam(':id', $reference_id, PDO::PARAM_INT);
-            $upd2->execute();
+            $del2->bindParam(':id', $reference_id, PDO::PARAM_INT);
+            $del2->execute();
             $status = 'failed';
         }
     }

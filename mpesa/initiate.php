@@ -66,10 +66,10 @@ if ($payment_type == 'package') {
     $amount = $pkg->Price;
     $title = $pkg->titlename;
 
-    // --- Check for existing active/pending subscription ---
+    // --- Check for existing active/pending subscription (allow retry if failed) ---
     $chk = $dbh->prepare("SELECT id FROM tblsubscriptions
         WHERE package_id = :package_id AND user_id = :user_id
-          AND status IN ('pending','active')");
+          AND (status = 'active' OR payment_status = 'pending')");
     $chk->bindParam(':package_id', $reference_id, PDO::PARAM_INT);
     $chk->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $chk->execute();
@@ -78,13 +78,27 @@ if ($payment_type == 'package') {
         exit;
     }
 
-    // --- Create pending subscription ---
-    $ins = $dbh->prepare("INSERT INTO tblsubscriptions (package_id, user_id, status, payment_status)
-        VALUES (:package_id, :user_id, 'pending', 'pending')");
-    $ins->bindParam(':package_id', $reference_id, PDO::PARAM_INT);
-    $ins->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-    $ins->execute();
-    $ref_id = $dbh->lastInsertId();
+    // --- Create pending subscription (reuse a failed row if present) ---
+    $chk2 = $dbh->prepare("SELECT id FROM tblsubscriptions
+        WHERE package_id = :package_id AND user_id = :user_id
+          AND payment_status = 'failed' ORDER BY id DESC LIMIT 1");
+    $chk2->bindParam(':package_id', $reference_id, PDO::PARAM_INT);
+    $chk2->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $chk2->execute();
+    $failed = $chk2->fetch(PDO::FETCH_OBJ);
+    if ($failed) {
+        $upd = $dbh->prepare("UPDATE tblsubscriptions SET status = 'pending', payment_status = 'pending' WHERE id = :id");
+        $upd->bindParam(':id', $failed->id, PDO::PARAM_INT);
+        $upd->execute();
+        $ref_id = $failed->id;
+    } else {
+        $ins = $dbh->prepare("INSERT INTO tblsubscriptions (package_id, user_id, status, payment_status)
+            VALUES (:package_id, :user_id, 'pending', 'pending')");
+        $ins->bindParam(':package_id', $reference_id, PDO::PARAM_INT);
+        $ins->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $ins->execute();
+        $ref_id = $dbh->lastInsertId();
+    }
 } else {
     // --- class_series: load series ---
     $sql = "SELECT * FROM tblclass_series WHERE id = :id AND status = 1";
@@ -99,8 +113,8 @@ if ($payment_type == 'package') {
     $amount = $series->price;
     $title = $series->title;
 
-    // --- Check duplicate enrollment ---
-    $chk = $dbh->prepare("SELECT id FROM tblclass_enrollment WHERE series_id = :series_id AND user_id = :user_id");
+    // --- Check duplicate enrollment (allow retry if failed) ---
+    $chk = $dbh->prepare("SELECT id FROM tblclass_enrollment WHERE series_id = :series_id AND user_id = :user_id AND payment_status IN ('pending','paid')");
     $chk->bindParam(':series_id', $reference_id, PDO::PARAM_INT);
     $chk->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $chk->execute();
@@ -119,13 +133,25 @@ if ($payment_type == 'package') {
         exit;
     }
 
-    // --- Create pending enrollment ---
-    $ins = $dbh->prepare("INSERT INTO tblclass_enrollment (series_id, user_id, status, payment_status)
-        VALUES (:series_id, :user_id, 'enrolled', 'pending')");
-    $ins->bindParam(':series_id', $reference_id, PDO::PARAM_INT);
-    $ins->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-    $ins->execute();
-    $ref_id = $dbh->lastInsertId();
+    // --- Create pending enrollment (reuse a failed row if present) ---
+    $chk2 = $dbh->prepare("SELECT id FROM tblclass_enrollment WHERE series_id = :series_id AND user_id = :user_id AND payment_status = 'failed' ORDER BY id DESC LIMIT 1");
+    $chk2->bindParam(':series_id', $reference_id, PDO::PARAM_INT);
+    $chk2->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $chk2->execute();
+    $failed = $chk2->fetch(PDO::FETCH_OBJ);
+    if ($failed) {
+        $upd = $dbh->prepare("UPDATE tblclass_enrollment SET status = 'enrolled', payment_status = 'pending' WHERE id = :id");
+        $upd->bindParam(':id', $failed->id, PDO::PARAM_INT);
+        $upd->execute();
+        $ref_id = $failed->id;
+    } else {
+        $ins = $dbh->prepare("INSERT INTO tblclass_enrollment (series_id, user_id, status, payment_status)
+            VALUES (:series_id, :user_id, 'enrolled', 'pending')");
+        $ins->bindParam(':series_id', $reference_id, PDO::PARAM_INT);
+        $ins->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $ins->execute();
+        $ref_id = $dbh->lastInsertId();
+    }
 }
 
 // --- Initiate STK Push ---

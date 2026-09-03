@@ -98,7 +98,7 @@ $uid=$_SESSION['uid'];
 							?>
 							<?php if($sub_status == 'active'): ?>
 								<span class="site-btn sb-line-gradient" style="cursor:default;">Subscribed</span>
-							<?php elseif($sub_status == 'pending'): ?>
+							<?php elseif($sub_status == 'pending' && $pay_status == 'pending'): ?>
 								<span class="site-btn sb-line-gradient" style="cursor:default;">Payment Pending</span>
 							<?php else: ?>
 								<button type="button" class="site-btn sb-line-gradient pay-subscribe-btn"

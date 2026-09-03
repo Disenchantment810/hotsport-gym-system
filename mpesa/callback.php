@@ -73,12 +73,12 @@ if ($cb['checkout_request_id']) {
                 $upd->execute();
 
                 if ($pay->payment_type == 'package') {
-                    $upd2 = $dbh->prepare("UPDATE tblsubscriptions SET payment_status = 'failed' WHERE id = :id");
+                    $del2 = $dbh->prepare("DELETE FROM tblsubscriptions WHERE id = :id");
                 } else {
-                    $upd2 = $dbh->prepare("UPDATE tblclass_enrollment SET payment_status = 'failed' WHERE id = :id");
+                    $del2 = $dbh->prepare("DELETE FROM tblclass_enrollment WHERE id = :id");
                 }
-                $upd2->bindParam(':id', $pay->reference_id, PDO::PARAM_INT);
-                $upd2->execute();
+                $del2->bindParam(':id', $pay->reference_id, PDO::PARAM_INT);
+                $del2->execute();
             } else {
             $upd = $dbh->prepare("UPDATE tblpayments
                 SET status = 'SUCCESS', result_code = :rc, result_desc = :rd,
@@ -135,12 +135,12 @@ if ($cb['checkout_request_id']) {
             $upd->execute();
 
             if ($pay->payment_type == 'package') {
-                $upd2 = $dbh->prepare("UPDATE tblsubscriptions SET payment_status = 'failed' WHERE id = :id");
+                $del2 = $dbh->prepare("DELETE FROM tblsubscriptions WHERE id = :id");
             } else {
-                $upd2 = $dbh->prepare("UPDATE tblclass_enrollment SET payment_status = 'failed' WHERE id = :id");
+                $del2 = $dbh->prepare("DELETE FROM tblclass_enrollment WHERE id = :id");
             }
-            $upd2->bindParam(':id', $pay->reference_id, PDO::PARAM_INT);
-            $upd2->execute();
+            $del2->bindParam(':id', $pay->reference_id, PDO::PARAM_INT);
+            $del2->execute();
         }
     }
 }
