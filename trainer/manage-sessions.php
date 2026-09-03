@@ -1,6 +1,7 @@
 <?php session_start();
 	error_reporting(0);
 	include  'include/config.php';
+	require_once '../include/csrf.php';
 	if (strlen($_SESSION['trainerid'])==0) {
 	  header('location:login.php');
 	  } else {
@@ -8,6 +9,9 @@
 
 	// Update individual session dates
 	if(isset($_POST['update_sessions'])){
+		if (!csrf_verify()) {
+		$errormsg= "Invalid request. Please try again.";
+		} else {
 		$series_id = intval($_POST['series_id']);
 		// verify ownership
 		$own = $dbh->prepare("SELECT id FROM tblclass_series WHERE id=:id AND trainer_id=:trainerid");
@@ -26,6 +30,7 @@
 				}
 			}
 			$msg= "Session dates updated successfully";
+		}
 		}
 	}
 
@@ -108,6 +113,7 @@
             <?php } ?>
             <div class="tile-body">
               <form method="post" action="manage-sessions.php?series=<?php echo $series_id;?>">
+                <?php csrf_field(); ?>
                 <input type="hidden" name="series_id" value="<?php echo $series_id;?>">
                 <table class="table table-hover table-bordered" id="sampleTable">
                   <thead>

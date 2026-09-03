@@ -1,12 +1,16 @@
 <?php session_start();
 	error_reporting(0);
 	include  'include/config.php';
+	require_once '../include/csrf.php';
 	if (strlen($_SESSION['trainerid'])==0) {
 	  header('location:login.php');
 	  } else {
 	$trainerid = $_SESSION['trainerid'];
 
 	if(isset($_POST['submit'])){
+	if (!csrf_verify()) {
+	$errormsg= "Invalid request. Please try again.";
+	} else {
 	$title = $_POST['title'];
 	$description = $_POST['description'];
 	$total_sessions = intval($_POST['total_sessions']);
@@ -49,6 +53,7 @@
 		echo "<script>window.location.href='manage-sessions.php?series=".$series_id."'</script>";
 	} else {
 		$errormsg= "Total sessions and start date are required";
+	}
 	}
 	}
 	}
@@ -95,6 +100,7 @@
           <?php } ?>
 
               <form class="row" method="post">
+                <?php csrf_field(); ?>
                  <div class="form-group col-md-12">
                   <label class="control-label">Series Title</label>
                   <input class="form-control" name="title" id="title" type="text" placeholder="Enter Series Title" required>

@@ -1,12 +1,16 @@
 <?php session_start();
 	error_reporting(0);
 	include  'include/config.php';
+	require_once '../include/csrf.php';
 	if (strlen($_SESSION['adminid'])==0) {
 	  header('location:logout.php');
 	  } else {
 
 	// Add / Update trainer
 	if(isset($_POST['submit'])){
+	if (!csrf_verify()) {
+	$errormsg= "Invalid request. Please try again.";
+	} else {
 	$name = $_POST['name'];
 	$email = $_POST['email'];
 	$mobile = $_POST['mobile'];
@@ -49,17 +53,22 @@
 		}
 	}
 	}
+	}
 
 	// Delete trainer
-	if(isset($_REQUEST['del']))
+	if(isset($_POST['del']))
 	{
-	$uid=intval($_GET['del']);
+	if (!csrf_verify()) {
+	echo "<script>alert('Invalid request. Please try again.');</script>";
+	} else {
+	$uid=intval($_POST['del']);
 	$sql = "delete from tbltrainers WHERE  id=:id";
 	$query = $dbh->prepare($sql);
 	$query-> bindParam(':id',$uid, PDO::PARAM_STR);
 	$query -> execute();
 	echo "<script>alert('Record Delete successfully');</script>";
 	echo "<script>window.location.href='manage-trainers.php'</script>";
+	}
 	}
 
 	// Load trainer for edit
@@ -117,6 +126,7 @@
           <?php } ?>
 
               <form class="row" method="post">
+                 <?php csrf_field(); ?>
                  <div class="form-group col-md-12">
                   <label class="control-label">Trainer Name</label>
                   <input class="form-control" name="name" id="name" type="text" placeholder="Enter Trainer Name" value="<?php echo $editrow ? htmlentities($editrow->name) : '';?>">
@@ -203,7 +213,11 @@
 	                    <td><?php echo ($result->status==1) ? 'Active' : 'Inactive';?></td>
 	                    <td>
 	                      <a href="manage-trainers.php?eid=<?php echo htmlentities($result->id);?>"><button class="btn btn-primary" type="button">Edit</button></a>
-	                      <a href="manage-trainers.php?del=<?php echo htmlentities($result->id);?>" onclick="return confirm('Delete this trainer?');"><button class="btn btn-danger" type="button">Delete</button></a></td>
+	                      <form method="post" style="display:inline;" onsubmit="return confirm('Delete this trainer?');">
+	                        <input type="hidden" name="csrf_token" value="<?php echo htmlentities(csrf_token()); ?>">
+	                        <input type="hidden" name="del" value="<?php echo htmlentities($result->id); ?>">
+	                        <button type="submit" class="btn btn-danger">Delete</button>
+	                      </form></td>
 	                  </tr>
 	                    <?php  $cnt=$cnt+1; } } ?>
                 </tbody>

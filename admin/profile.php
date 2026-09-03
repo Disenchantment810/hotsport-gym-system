@@ -2,6 +2,7 @@
 session_start();
 error_reporting(0);
 require_once('include/config.php');
+require_once('../include/csrf.php');
 if(strlen( $_SESSION["adminid"])==0)
     {   
 header('location:login.php');
@@ -11,6 +12,9 @@ else{
 
 if(isset($_POST['submit']))
 {
+if (!csrf_verify()) {
+$msg= "Invalid request. Please try again.";
+} else {
 $adminid=$_SESSION['adminid'];
 $name=$_POST['name'];
 $email=$_POST['email'];
@@ -27,6 +31,7 @@ $query->execute();
 echo "<script>alert('Profile has been updated.');</script>";
 echo "<script> window.location.href =profile.php;</script>";
 
+}
 }
 
 
@@ -61,6 +66,7 @@ echo "<script> window.location.href =profile.php;</script>";
             <h3 class="tile-title">Profile</h3>
             <div class="tile-body">
               <form class="row" method="post">
+                <?php csrf_field(); ?>
                   <?php 
               $adminid=$_SESSION['adminid'];
               $sql ="SELECT id, name,email,mobile,create_date from tbladmin where id=:adminid ";
@@ -75,20 +81,20 @@ echo "<script> window.location.href =profile.php;</script>";
               { ?>
                 <div class="form-group col-md-12">
                   <label class="control-label">Name</label>
-                  <input class="form-control" type="text" name="name" id="name" placeholder="Enter your name" value="<?php echo $result->name;?>">
+                  <input class="form-control" type="text" name="name" id="name" placeholder="Enter your name" value="<?php echo htmlentities($result->name);?>">
                 </div>
                 <div class="form-group col-md-12">
                   <label class="control-label">Email</label>
-                  <input class="form-control" type="text" name="email" id="email" placeholder="Enter your email" value="<?php echo $result->email;?>" readonly>
+                  <input class="form-control" type="text" name="email" id="email" placeholder="Enter your email" value="<?php echo htmlentities($result->email);?>" readonly>
                 </div>
                  <div class="form-group col-md-12">
                   <label class="control-label">Mobile No</label>
-                  <input class="form-control" type="text" name="mobile" id="mobile" placeholder="Enter your Mobile" value="<?php echo $result->mobile;?>">
+                  <input class="form-control" type="text" name="mobile" id="mobile" placeholder="Enter your Mobile" value="<?php echo htmlentities($result->mobile);?>">
                 </div>
 	
                          <div class="form-group col-md-12">
                   <label class="control-label">Regd. Date</label>
-                  <input class="form-control" type="text" name="reg" id="reg"  value="<?php echo $result->create_date;?>" readonly>
+                  <input class="form-control" type="text" name="reg" id="reg"  value="<?php echo htmlentities($result->create_date);?>" readonly>
                 </div>
                  
                 <div class="form-group col-md-4 align-self-end">

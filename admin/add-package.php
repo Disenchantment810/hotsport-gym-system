@@ -1,10 +1,14 @@
 <?php session_start();
 error_reporting(0);
 include  'include/config.php'; 
-if (strlen($_SESSION['adminid']==0)) {
+require_once '../include/csrf.php';
+if (strlen($_SESSION['adminid'])==0) {
   header('location:logout.php');
   } else{
 if(isset($_POST['submit'])){
+if (!csrf_verify()) {
+$errormsg= "Invalid request. Please try again.";
+} else {
 $AddPackage = $_POST['addPackage'];
 $category = $_POST['category'];
 $sql="INSERT INTO tblpackage (PackageName,cate_id) Values(:Package,:category)";
@@ -23,18 +27,23 @@ else {
 $errormsg= "Data not insert successfully";
  }
 }
+}
 
 //Delete Record Data
 
-if(isset($_REQUEST['del']))
+if(isset($_POST['del']))
 {
-$uid=intval($_GET['del']);
+if (!csrf_verify()) {
+echo "<script>alert('Invalid request. Please try again.');</script>";
+} else {
+$uid=intval($_POST['del']);
 $sql = "delete from tblpackage WHERE  id=:id";
 $query = $dbh->prepare($sql);
 $query-> bindParam(':id',$uid, PDO::PARAM_STR);
 $query -> execute();
 echo "<script>alert('Record Delete successfully');</script>";
 echo "<script>window.location.href='add-package.php'</script>";
+}
 }
 ?>
 
@@ -80,6 +89,7 @@ echo "<script>window.location.href='add-package.php'</script>";
           <?php } ?>
 
               <form class="row" method="post">
+                 <?php csrf_field(); ?>
                  <div class="form-group col-md-12">
                   <label class="control-label">Add Category</label>
                   <select class="form-control" name="category" id="category">
@@ -153,7 +163,11 @@ echo "<script>window.location.href='add-package.php'</script>";
                     <td><?php echo htmlentities($result->PackageName);?></td>
                     <td>
 <!--                       <a href="add-package.php?cid=<?php echo htmlentities($result->id);?>"><button class="btn btn-primary" type="button">Edit</button></a> 
- -->                      <a href="add-package.php?del=<?php echo htmlentities($result->id);?>"><button class="btn btn-danger" type="button">Delete</button></a></td>
+ -->                      <form method="post" style="display:inline;" onsubmit="return confirm('Delete this package type?');">
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlentities(csrf_token()); ?>">
+                        <input type="hidden" name="del" value="<?php echo htmlentities($result->id); ?>">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                      </form></td>
                   </tr>
                     <?php  $cnt=$cnt+1; } } ?>
               

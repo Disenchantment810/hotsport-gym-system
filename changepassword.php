@@ -2,6 +2,7 @@
 session_start();
 error_reporting(0);
 require_once('include/config.php');
+require_once('include/csrf.php');
 if(strlen( $_SESSION["uid"])==0)
     {   
 header('location:login.php');
@@ -10,6 +11,9 @@ else{
 // Code for change password	
 if(isset($_POST['submit']))
 	{
+if (!csrf_verify()) {
+$msg= "Invalid request. Please try again.";
+} else {
 $password=md5($_POST['password']);
 $newpassword=md5($_POST['newpassword']);
 $email=$_SESSION['email'];
@@ -30,6 +34,7 @@ $msg="Your Password succesfully changed";
 }
 else {
 $error="Your current password is not valid.";	
+}
 }
 }
 ?>
@@ -122,6 +127,7 @@ return true;
 				else if($msg){?><div class="succWrap"><strong>SUCCESS</strong>:<?php echo htmlentities($msg); ?> </div><?php }?>
 						
 						<form class="singup-form contact-form" method="post" onSubmit="return valid();">
+							<?php csrf_field(); ?>
 						<div class="row">
 							<div class="col-md-12">
 								<input type="password" name="password" id="password" placeholder="Old Password" autocomplete="off">

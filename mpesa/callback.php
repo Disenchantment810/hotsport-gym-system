@@ -52,7 +52,34 @@ if ($cb['checkout_request_id']) {
 
     if ($pay) {
         if ($cb['result_code'] == '0') {
-            // Success
+            // Success — verify the callback amount matches the expected payment
+            // and that an M-Pesa receipt was provided before marking as paid.
+            $expected = (float) $pay->amount;
+            $received = (float) $cb['amount'];
+            $hasReceipt = !empty($cb['receipt']);
+            $amountOk = ($expected > 0 && $received > 0 && abs($expected - $received) < 0.01);
+
+            if (!$hasReceipt || !$amountOk) {
+                // Treat as failed: amount mismatch or missing receipt.
+                $status = 'FAILED';
+                $upd = $dbh->prepare("UPDATE tblpayments
+                    SET status = :status, result_code = :rc, result_desc = :rd
+                    WHERE id = :id");
+                $upd->bindParam(':status', $status, PDO::PARAM_STR);
+                $upd->bindParam(':rc', $cb['result_code'], PDO::PARAM_STR);
+                $rd = $hasReceipt ? 'Amount mismatch with expected payment' : 'Missing M-Pesa receipt';
+                $upd->bindParam(':rd', $rd, PDO::PARAM_STR);
+                $upd->bindParam(':id', $pay->id, PDO::PARAM_INT);
+                $upd->execute();
+
+                if ($pay->payment_type == 'package') {
+                    $upd2 = $dbh->prepare("UPDATE tblsubscriptions SET payment_status = 'failed' WHERE id = :id");
+                } else {
+                    $upd2 = $dbh->prepare("UPDATE tblclass_enrollment SET payment_status = 'failed' WHERE id = :id");
+                }
+                $upd2->bindParam(':id', $pay->reference_id, PDO::PARAM_INT);
+                $upd2->execute();
+            } else {
             $upd = $dbh->prepare("UPDATE tblpayments
                 SET status = 'SUCCESS', result_code = :rc, result_desc = :rd,
                     transaction_receipt = :receipt, transaction_date = :tdate
@@ -93,6 +120,7 @@ if ($cb['checkout_request_id']) {
                 $upd2 = $dbh->prepare("UPDATE tblclass_enrollment SET payment_status = 'paid' WHERE id = :id");
                 $upd2->bindParam(':id', $pay->reference_id, PDO::PARAM_INT);
                 $upd2->execute();
+            }
             }
         } else {
             // Failed / timeout

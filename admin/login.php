@@ -3,9 +3,17 @@
 session_start();
 error_reporting(0);
 require_once('include/config.php');
+require_once('../include/csrf.php');
+require_once('../include/login_throttle.php');
 $msg = ""; 
 if(isset($_POST['submit'])) {
+  if (!csrf_verify()) {
+    $msg = "Invalid request. Please try again.";
+  } else {
   $email = trim($_POST['email']);
+  if (throttle_blocked($dbh, $email)) {
+    $msg = "Too many failed attempts. Please try again later.";
+  } else {
   $password = md5(($_POST['password']));
   if($email != "" && $password != "") {
     try {
@@ -18,11 +26,14 @@ if(isset($_POST['submit'])) {
       $row   = $stmt->fetch(PDO::FETCH_ASSOC);
       if($count == 1 && !empty($row)) {
         /******************** Your code ***********************/
+        throttle_clear($dbh, $email);
+        session_regenerate_id(true);
         $_SESSION['adminid']   = $row['id'];
         $_SESSION['email'] = $row['email'];
         $_SESSION['name'] = $row['fname'];
        header("location: index.php");
       } else {
+        throttle_fail($dbh, $email);
         $msg = "Invalid username and password!";
       }
     } catch (PDOException $e) {
@@ -30,6 +41,8 @@ if(isset($_POST['submit'])) {
     }
   } else {
     $msg = "Both fields are required!";
+  }
+  }
   }
 }
 ?>
@@ -57,6 +70,7 @@ if(isset($_POST['submit'])) {
       </div>
       <div class="login-box">
         <form class="login-form" method="post">
+          <?php csrf_field(); ?>
           <h3 class="login-head"><i class="fa fa-lg fa-fw fa-user"></i>SIGN IN</h3>
            <?php if($error){?><div class="errorWrap" style="color:red;"><strong>ERROR</strong>:<?php echo htmlentities($error); ?> </div><?php } 
                 else if($msg){?><div class="succWrap" style="color:red;"><strong>Error</strong>:<?php echo htmlentities($msg); ?> </div><?php }?>

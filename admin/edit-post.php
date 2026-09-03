@@ -1,12 +1,16 @@
 <?php session_start();
 error_reporting(0);
 include  'include/config.php'; 
-if (strlen($_SESSION['adminid']==0)) {
+require_once '../include/csrf.php';
+if (strlen($_SESSION['adminid'])==0) {
   header('location:logout.php');
   } else{
 
 $pid=$_GET['pid'];
 if(isset($_POST['Submit'])){
+if (!csrf_verify()) {
+$errormsg= "Invalid request. Please try again.";
+} else {
 $category = $_POST['category'];
 $titlename = $_POST['titlename'];
 $package = $_POST['package'];
@@ -31,6 +35,7 @@ $query->execute();
 echo "<script>alert('Record Updated successfully');</script>";
 // Code for redirection
 echo "<script>window.location.href='manage-post.php'</script>";
+}
 }
 ?>
 <!DOCTYPE html>
@@ -92,10 +97,11 @@ echo "<script>window.location.href='manage-post.php'</script>";
                   ?>
             <div class="tile-body">
               <form class="row" method="post">
+                <?php csrf_field(); ?>
                 <div class="form-group col-md-6">
                   <label class="control-label">Category</label>
                  <select name="category" id="category" class="form-control" onChange="getdistrict(this.value);">
-                  <option value="<?php echo $result->id;?>"><?php echo $result->category_name;?></option>
+                  <option value="<?php echo $result->id;?>"><?php echo htmlentities($result->category_name);?></option>
                   <option value="NA">--select--</option>
                   <?php 
                   $stmt = $dbh->prepare("SELECT * FROM tblcategory ORDER BY category_name");
@@ -111,26 +117,26 @@ echo "<script>window.location.href='manage-post.php'</script>";
                  <div class="form-group col-md-6">
                   <label class="control-label">Package Type</label>
                    <select name="package" id="package" class="form-control">
-                     <option value="<?php echo $result->id;?>"><?php echo $result->PackageName;?></option>
+                     <option value="<?php echo $result->id;?>"><?php echo htmlentities($result->PackageName);?></option>
                   	
                  </select>
                 </div>
 
                 <div class="form-group col-md-6">
                   <label class="control-label">Title Name</label>
-                  <input class="form-control" name="titlename" id="titlename" type="text" placeholder="Enter your Title Name" value="<?php echo $result->titlename;?>">
+                  <input class="form-control" name="titlename" id="titlename" type="text" placeholder="Enter your Title Name" value="<?php echo htmlentities($result->titlename);?>">
                 </div>
 
                
 
                  <div class="form-group col-md-6">
                   <label class="control-label">Package Duratiobn</label>
-                  <input class="form-control" type="text" name="packageduratiobn" name="packageduratiobn" placeholder="Enter Package Duratiobn" value="<?php echo $result->PackageDuratiobn;?>">
+                  <input class="form-control" type="text" name="packageduratiobn" name="packageduratiobn" placeholder="Enter Package Duratiobn" value="<?php echo htmlentities($result->PackageDuratiobn);?>">
                 </div>
 
                  <div class="form-group col-md-6">
                   <label class="control-label">Price (Ksh)</label>
-                  <input class="form-control" type="text" name="Price" id="Price" placeholder="Enter your Price" value="<?php echo $result->Price;?>">
+                  <input class="form-control" type="text" name="Price" id="Price" placeholder="Enter your Price" value="<?php echo htmlentities($result->Price);?>">
                 </div>
                 
                  <!-- <div class="form-group col-md-6">
@@ -140,7 +146,7 @@ echo "<script>window.location.href='manage-post.php'</script>";
 
                   <div class="form-group col-md-6">
                   <label class="control-label">Description</label>
-                  <textarea name="description" id="description" class="form-control" cols="5" rows="10"><?php echo $result->Description;?></textarea> 
+                  <textarea name="description" id="description" class="form-control" cols="5" rows="10"><?php echo htmlentities($result->Description);?></textarea> 
                 </div>
 
                 <div class="form-group col-md-4 align-self-end">

@@ -145,4 +145,21 @@ if ($exists == 0) {
 } else {
     echo "is_deleted column already exists.\n";
 }
+
+// Create login_attempts table (idempotent) for brute-force protection
+$tbl = $dbh->query("SELECT COUNT(*) AS c FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'login_attempts'");
+$tblExists = $tbl->fetch(PDO::FETCH_OBJ)->c;
+if ($tblExists == 0) {
+    $dbh->exec("CREATE TABLE `login_attempts` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `identifier` varchar(255) NOT NULL,
+        `attempt_time` timestamp NOT NULL DEFAULT current_timestamp(),
+        PRIMARY KEY (`id`),
+        KEY `idx_identifier` (`identifier`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
+    echo "Created login_attempts table.\n";
+} else {
+    echo "login_attempts table already exists.\n";
+}
 ?>

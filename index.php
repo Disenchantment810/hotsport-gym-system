@@ -74,14 +74,14 @@ $uid=$_SESSION['uid'];
 				<div class="col-lg-3 col-sm-6">
 					<div class="pricing-item begginer">
 						<div class="pi-top">
-							<h4><?php echo $result->titlename;?></h4>
+							<h4><?php echo htmlentities($result->titlename);?></h4>
 						</div>
 						<div class="pi-price">
 							<h3>Ksh <?php echo number_format((float)$result->Price, 2);?></h3>
-							<p>	<?php echo $result->PackageDuratiobn;?></p>
+							<p>	<?php echo htmlentities($result->PackageDuratiobn);?></p>
 						</div>
 						<ul>
-							<?php echo $result->Description;?>
+							<?php echo htmlentities($result->Description);?>
 							
 						</ul>
 						<?php if(strlen($_SESSION['uid'])==0): ?>

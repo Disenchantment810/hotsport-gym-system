@@ -1,20 +1,25 @@
 <?php session_start();
 error_reporting(0);
 include  'include/config.php'; 
-if (strlen($_SESSION['adminid']==0)) {
+require_once '../include/csrf.php';
+if (strlen($_SESSION['adminid'])==0) {
   header('location:logout.php');
   } else{
 
 //Soft Delete Record Data
-if(isset($_REQUEST['del']))
+if(isset($_POST['del']))
 {
-$uid=intval($_GET['del']);
+if (!csrf_verify()) {
+echo "<script>alert('Invalid request. Please try again.');</script>";
+} else {
+$uid=intval($_POST['del']);
 $sql = "update tbladdpackage set is_deleted=1 WHERE id=:id";
 $query = $dbh->prepare($sql);
 $query-> bindParam(':id',$uid, PDO::PARAM_STR);
 $query -> execute();
 echo "<script>alert('Package deleted successfully');</script>";
 echo "<script>window.location.href='manage-post.php'</script>";
+}
 }
 ?>
 <!DOCTYPE html>
@@ -91,7 +96,11 @@ echo "<script>window.location.href='manage-post.php'</script>";
                   <td>
 
                    <a href="edit-post.php?pid=<?php echo htmlentities($result->packageid);?>"><span class="btn btn-success">Edit</span></a>
-                   <a href="manage-post.php?del=<?php echo htmlentities($result->packageid);?>" onclick="return confirm('Delete this package?');"><span class="btn btn-danger">Delete</span></a>
+                   <form method="post" style="display:inline;" onsubmit="return confirm('Delete this package?');">
+                     <input type="hidden" name="csrf_token" value="<?php echo htmlentities(csrf_token()); ?>">
+                     <input type="hidden" name="del" value="<?php echo htmlentities($result->packageid); ?>">
+                     <button type="submit" class="btn btn-danger">Delete</button>
+                   </form>
                   </tr>
                    
                  

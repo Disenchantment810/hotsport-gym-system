@@ -1,6 +1,7 @@
 <?php session_start();
 	error_reporting(0);
 	include  'include/config.php';
+	require_once '../include/csrf.php';
 	if (strlen($_SESSION['trainerid'])==0) {
 	  header('location:login.php');
 	  } else {
@@ -35,6 +36,9 @@
 
 	// Save attendance (upsert)
 	if(isset($_POST['save_attendance']) && $session){
+		if (!csrf_verify()) {
+		$errormsg= "Invalid request. Please try again.";
+		} else {
 		$statuses = $_POST['attendance'];
 		$upd = $dbh->prepare("INSERT INTO tblclass_attendance (session_id, enrollment_id, status) VALUES (:session_id, :enrollment_id, :status)
 			ON DUPLICATE KEY UPDATE status=:status2");
@@ -48,6 +52,7 @@
 			}
 		}
 		$msg= "Attendance saved successfully";
+		}
 	}
 	}
 	?>
@@ -148,6 +153,7 @@
             <?php } ?>
             <div class="tile-body">
               <form method="post" action="attendance.php?series=<?php echo $series_id;?>&session=<?php echo $session_id;?>">
+                <?php csrf_field(); ?>
                 <table class="table table-hover table-bordered" id="sampleTable">
                   <thead>
                     <tr>

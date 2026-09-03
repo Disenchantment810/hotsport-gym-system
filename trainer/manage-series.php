@@ -1,15 +1,19 @@
 <?php session_start();
 	error_reporting(0);
 	include  'include/config.php';
+	require_once '../include/csrf.php';
 	if (strlen($_SESSION['trainerid'])==0) {
 	  header('location:login.php');
 	  } else {
 	$trainerid = $_SESSION['trainerid'];
 
 	// Delete series (only own)
-	if(isset($_REQUEST['del']))
+	if(isset($_POST['del']))
 	{
-	$uid=intval($_GET['del']);
+	if (!csrf_verify()) {
+	echo "<script>alert('Invalid request. Please try again.');</script>";
+	} else {
+	$uid=intval($_POST['del']);
 	$sql = "delete from tblclass_series WHERE id=:id AND trainer_id=:trainerid";
 	$query = $dbh->prepare($sql);
 	$query-> bindParam(':id',$uid, PDO::PARAM_STR);
@@ -17,6 +21,7 @@
 	$query -> execute();
 	echo "<script>alert('Series deleted successfully');</script>";
 	echo "<script>window.location.href='manage-series.php'</script>";
+	}
 	}
 	}
 	?>
@@ -88,7 +93,11 @@
 	                    <td>
 	                      <a href="manage-sessions.php?series=<?php echo htmlentities($result->id);?>"><button class="btn btn-info" type="button">Sessions</button></a>
 	                      <a href="edit-series.php?cid=<?php echo htmlentities($result->id);?>"><button class="btn btn-primary" type="button">Edit</button></a>
-	                      <a href="manage-series.php?del=<?php echo htmlentities($result->id);?>" onclick="return confirm('Delete this series and all its sessions?');"><button class="btn btn-danger" type="button">Delete</button></a></td>
+	                      <form method="post" style="display:inline;" onsubmit="return confirm('Delete this series and all its sessions?');">
+	                        <input type="hidden" name="csrf_token" value="<?php echo htmlentities(csrf_token()); ?>">
+	                        <input type="hidden" name="del" value="<?php echo htmlentities($result->id); ?>">
+	                        <button type="submit" class="btn btn-danger">Delete</button>
+	                      </form></td>
 	                  </tr>
 	                    <?php  $cnt=$cnt+1; } } ?>
                 </tbody>

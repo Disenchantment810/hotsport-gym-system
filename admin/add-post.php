@@ -1,12 +1,15 @@
 <?php session_start();
 error_reporting(0);
 include  'include/config.php'; 
-if (strlen($_SESSION['adminid']==0)) {
+require_once '../include/csrf.php';
+if (strlen($_SESSION['adminid'])==0) {
   header('location:logout.php');
   } else{
 include  'include/config.php';
 if(isset($_POST['Submit'])){
-
+if (!csrf_verify()) {
+$errormsg= "Invalid request. Please try again.";
+} else {
 $category = $_POST['category'];
 $titlename = $_POST['titlename'];$package = $_POST['package'];$packageduratiobn = $_POST['packageduratiobn'];$Price = $_POST['Price'];$photo = $_POST['photo'];$description = $_POST['description'];
 
@@ -31,6 +34,7 @@ else {
 
 $errormsg= "Data not insert successfully";
  }
+}
 }
 ?>
 <!DOCTYPE html>
@@ -75,6 +79,7 @@ $errormsg= "Data not insert successfully";
           <?php } ?>
             <div class="tile-body">
               <form class="row" method="post">
+                <?php csrf_field(); ?>
                 <div class="form-group col-md-6">
                   <label class="control-label">Category</label>
                  <select name="category" id="category" class="form-control" onChange="getdistrict(this.value);">

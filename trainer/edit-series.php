@@ -1,12 +1,16 @@
 <?php session_start();
 	error_reporting(0);
 	include  'include/config.php';
+	require_once '../include/csrf.php';
 	if (strlen($_SESSION['trainerid'])==0) {
 	  header('location:login.php');
 	  } else {
 	$trainerid = $_SESSION['trainerid'];
 
 	if(isset($_POST['submit'])){
+	if (!csrf_verify()) {
+	$errormsg= "Invalid request. Please try again.";
+	} else {
 	$cid = intval($_POST['cid']);
 	$title = $_POST['title'];
 	$description = $_POST['description'];
@@ -25,6 +29,7 @@
 	$query->bindParam(':trainerid',$trainerid,PDO::PARAM_INT);
 	$query -> execute();
 	$msg= "Series Updated Successfully";
+	}
 	}
 
 	$cid = isset($_GET['cid']) ? intval($_GET['cid']) : 0;
@@ -74,6 +79,7 @@
           <?php } ?>
 
               <form class="row" method="post">
+                <?php csrf_field(); ?>
                  <input type="hidden" name="cid" value="<?php echo $result->id;?>">
                  <div class="form-group col-md-12">
                   <label class="control-label">Series Title</label>

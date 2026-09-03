@@ -1,9 +1,14 @@
 <?php
+session_start();
 error_reporting(0);
 require_once('include/config.php');
+require_once('include/csrf.php');
 
 if(isset($_POST['submit']))
 { 
+if (!csrf_verify()) {
+$error= "Invalid request. Please try again.";
+} else {
 $fname=$_POST['fname'];
 $lname=$_POST['lname'];
 $mobile=$_POST['mobile'];
@@ -81,6 +86,7 @@ else
 $error ="Registration Not successfully";
  }
 }
+}
  }
  
  ?>
@@ -131,6 +137,7 @@ $error ="Registration Not successfully";
 					<?php if($error){?><div class="errorWrap"><strong>ERROR</strong>:<?php echo htmlentities($error); ?> </div><?php } 
                 else if($succmsg){?><div class="succWrap"><strong>SUCCESS</strong>:<?php echo htmlentities($succmsg); ?> </div><?php }?><br><br>
 					<form class="singup-form contact-form" method="post">
+						<?php csrf_field(); ?>
 						<div class="row">
 							<div class="col-md-6">
 								<input type="text" name="fname" id="fname" placeholder="First Name" autocomplete="off" value="<?php echo $fname;?>" required>

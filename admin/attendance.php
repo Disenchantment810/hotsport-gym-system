@@ -1,7 +1,8 @@
 <?php  session_start();
 error_reporting(0);
 include  'include/config.php';
-if (strlen($_SESSION['adminid']==0)) {
+require_once '../include/csrf.php';
+if (strlen($_SESSION['adminid'])==0) {
   header('location:logout.php');
   } else{
 ?>
@@ -39,6 +40,9 @@ if (strlen($_SESSION['adminid']==0)) {
               // Handle check-in form submission
               if(isset($_POST['checkin_submit']))
               {
+                  if (!csrf_verify()) {
+                      echo "<div class='alert alert-danger'>Invalid request. Please try again.</div>";
+                  } else {
                   $user_id = $_POST['user_id'];
 
                   // Check if user is already checked in (has an open session)
@@ -68,11 +72,15 @@ if (strlen($_SESSION['adminid']==0)) {
                           echo "<div class='alert alert-danger'>Error checking in member.</div>";
                       }
                   }
+                  }
               }
 
               // Handle check-out button submission
               if(isset($_POST['checkout_submit']))
               {
+                  if (!csrf_verify()) {
+                      echo "<div class='alert alert-danger'>Invalid request. Please try again.</div>";
+                  } else {
                   $attendance_id = $_POST['attendance_id'];
 
                   // Update check-out time
@@ -89,6 +97,7 @@ if (strlen($_SESSION['adminid']==0)) {
                   {
                       echo "<div class='alert alert-danger'>Error checking out member.</div>";
                   }
+                  }
               }
               ?>
 
@@ -96,6 +105,7 @@ if (strlen($_SESSION['adminid']==0)) {
               <div class="row mb-4">
                 <div class="col-md-6">
                   <form method="post" action="">
+                    <?php csrf_field(); ?>
                     <div class="form-group">
                       <label for="user_id">Select Member:</label>
                       <select class="form-control" id="user_id" name="user_id" required>
@@ -161,6 +171,7 @@ if (strlen($_SESSION['adminid']==0)) {
                         <td><?php echo htmlentities($result->check_in);?></td>
                         <td>
                           <form method="post" action="" style="display: inline;">
+                            <?php csrf_field(); ?>
                             <input type="hidden" name="attendance_id" value="<?php echo htmlentities($result->id);?>">
                             <button type="submit" name="checkout_submit" class="btn btn-warning btn-sm">Check Out</button>
                           </form>

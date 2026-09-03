@@ -1,15 +1,19 @@
 <?php session_start();
 	error_reporting(0);
 	include  'include/config.php';
+	require_once '../include/csrf.php';
 	if (strlen($_SESSION['trainerid'])==0) {
 	  header('location:login.php');
 	  } else {
 	$trainerid = $_SESSION['trainerid'];
 
 	// Revoke certificate
-	if(isset($_REQUEST['revoke']))
+	if(isset($_POST['revoke']))
 	{
-	$cid=intval($_GET['revoke']);
+	if (!csrf_verify()) {
+	echo "<script>alert('Invalid request. Please try again.');</script>";
+	} else {
+	$cid=intval($_POST['revoke']);
 	$sql = "UPDATE tblcertificates SET is_active=0 WHERE id=:id AND trainer_id=:trainerid";
 	$query = $dbh->prepare($sql);
 	$query-> bindParam(':id',$cid, PDO::PARAM_STR);
@@ -18,11 +22,15 @@
 	echo "<script>alert('Certificate revoked successfully');</script>";
 	echo "<script>window.location.href='manage-certificates.php'</script>";
 	}
+	}
 
 	// Re-activate certificate
-	if(isset($_REQUEST['activate']))
+	if(isset($_POST['activate']))
 	{
-	$cid=intval($_GET['activate']);
+	if (!csrf_verify()) {
+	echo "<script>alert('Invalid request. Please try again.');</script>";
+	} else {
+	$cid=intval($_POST['activate']);
 	$sql = "UPDATE tblcertificates SET is_active=1 WHERE id=:id AND trainer_id=:trainerid";
 	$query = $dbh->prepare($sql);
 	$query-> bindParam(':id',$cid, PDO::PARAM_STR);
@@ -30,6 +38,7 @@
 	$query -> execute();
 	echo "<script>alert('Certificate activated successfully');</script>";
 	echo "<script>window.location.href='manage-certificates.php'</script>";
+	}
 	}
 	}
 	?>
@@ -100,9 +109,17 @@
 	                    <td><?php echo ($result->is_active==1) ? '<span class="label label-success">Active</span>' : '<span class="label label-danger">Revoked</span>';?></td>
 	                    <td>
 	                      <?php if($result->is_active==1){ ?>
-	                        <a href="manage-certificates.php?revoke=<?php echo htmlentities($result->id);?>" onclick="return confirm('Revoke this certificate?');"><button class="btn btn-danger" type="button">Revoke</button></a>
+	                        <form method="post" style="display:inline;" onsubmit="return confirm('Revoke this certificate?');">
+	                          <input type="hidden" name="csrf_token" value="<?php echo htmlentities(csrf_token()); ?>">
+	                          <input type="hidden" name="revoke" value="<?php echo htmlentities($result->id); ?>">
+	                          <button type="submit" class="btn btn-danger">Revoke</button>
+	                        </form>
 	                      <?php } else { ?>
-	                        <a href="manage-certificates.php?activate=<?php echo htmlentities($result->id);?>" onclick="return confirm('Re-activate this certificate?');"><button class="btn btn-success" type="button">Activate</button></a>
+	                        <form method="post" style="display:inline;" onsubmit="return confirm('Re-activate this certificate?');">
+	                          <input type="hidden" name="csrf_token" value="<?php echo htmlentities(csrf_token()); ?>">
+	                          <input type="hidden" name="activate" value="<?php echo htmlentities($result->id); ?>">
+	                          <button type="submit" class="btn btn-success">Activate</button>
+	                        </form>
 	                      <?php } ?>
 	                    </td>
 	                  </tr>

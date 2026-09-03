@@ -1,6 +1,7 @@
 <?php session_start();
 	error_reporting(0);
 	include  'include/config.php';
+	require_once '../include/csrf.php';
 	if (strlen($_SESSION['trainerid'])==0) {
 	  header('location:login.php');
 	  } else {
@@ -22,6 +23,9 @@
 
 	// Issue certificate
 	if(isset($_POST['issue']) && $series){
+		if (!csrf_verify()) {
+		$errormsg= "Invalid request. Please try again.";
+		} else {
 		$enrollment_id = intval($_POST['enrollment_id']);
 		$user_id = intval($_POST['user_id']);
 		// Verify this enrollment belongs to this series
@@ -49,6 +53,7 @@
 			} else {
 				$errormsg= "A certificate has already been issued for this member.";
 			}
+		}
 		}
 	}
 	}
@@ -179,6 +184,7 @@
 	                    <td>
 	                      <?php if($eligible && !$certrow){ ?>
 	                        <form method="post" style="display:inline;">
+	                          <?php csrf_field(); ?>
 	                          <input type="hidden" name="enrollment_id" value="<?php echo $result->enrollment_id;?>">
 	                          <input type="hidden" name="user_id" value="<?php echo $result->user_id;?>">
 	                          <button type="submit" name="issue" class="btn btn-sm btn-success">Issue Certificate</button>

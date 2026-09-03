@@ -1,12 +1,16 @@
 <?php session_start();
 error_reporting(0);
 include  'include/config.php';
+require_once '../include/csrf.php';
 if (strlen($_SESSION['trainerid'])==0) {
   header('location:login.php');
   } else{
 // Code for change password
 if(isset($_POST['submit']))
   {
+if (!csrf_verify()) {
+$msg= "Invalid request. Please try again.";
+} else {
 $password=md5($_POST['password']);
 $newpassword=md5($_POST['newpassword']);
 $email=$_SESSION['email'];
@@ -27,6 +31,7 @@ $msg="Your Password succesfully changed";
 }
 else {
 $error="Your current password is not valid.";
+}
 }
 }
 ?>
@@ -61,6 +66,7 @@ $error="Your current password is not valid.";
 
             <div class="tile-body">
               <form class="row" method="post">
+                <?php csrf_field(); ?>
                 <div class="form-group col-md-12">
                   <label class="control-label">Old Password</label>
                 <input type="password" name="password" id="password" placeholder="Old Password" class="form-control" autocomplete="off">
