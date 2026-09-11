@@ -3,6 +3,7 @@ session_start();
 error_reporting(0);
 require_once('include/config.php');
 require_once('include/csrf.php');
+require_once('include/password_migration.php');
 
 if(isset($_POST['submit']))
 { 
@@ -16,7 +17,7 @@ $email=$_POST['email'];
 $state=$_POST['state'];
 $city=$_POST['city'];
 $Password=$_POST['password'];
-$pass=md5($Password);
+$pass=password_hash_new($Password);
 $RepeatPassword = $_POST['RepeatPassword'];
 
 // Email id Already Exit

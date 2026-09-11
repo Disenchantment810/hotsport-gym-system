@@ -3,6 +3,7 @@ session_start();
 error_reporting(0);
 require_once('include/config.php');
 require_once('include/csrf.php');
+require_once('include/password_migration.php');
 if(strlen( $_SESSION["uid"])==0)
     {   
 header('location:login.php');
@@ -14,20 +15,20 @@ if(isset($_POST['submit']))
 if (!csrf_verify()) {
 $msg= "Invalid request. Please try again.";
 } else {
-$password=md5($_POST['password']);
-$newpassword=md5($_POST['newpassword']);
+$currentpw=isset($_POST['password']) ? $_POST['password'] : '';
+$newpw=isset($_POST['newpassword']) ? $_POST['newpassword'] : '';
 $email=$_SESSION['email'];
-$sql ="SELECT password FROM tbluser WHERE email=:email and password=:password";
+$sql ="SELECT id, password FROM tbluser WHERE email=:email";
 $query= $dbh -> prepare($sql);
 $query-> bindParam(':email', $email, PDO::PARAM_STR);
-$query-> bindParam(':password', $password, PDO::PARAM_STR);
 $query-> execute();
-$results = $query -> fetchAll(PDO::FETCH_OBJ);
-if($query -> rowCount() > 0)
+$acctrow = $query -> fetch(PDO::FETCH_OBJ);
+if($acctrow && !empty($acctrow->password) && password_verify_compat($currentpw, $acctrow->password))
 {
 $con="update tbluser set password=:newpassword where email=:email";
 $chngpwd1 = $dbh->prepare($con);
 $chngpwd1-> bindParam(':email', $email, PDO::PARAM_STR);
+$newpassword = password_hash_new($newpw);
 $chngpwd1-> bindParam(':newpassword', $newpassword, PDO::PARAM_STR);
 $chngpwd1->execute();
 $msg="Your Password succesfully changed";

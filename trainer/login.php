@@ -4,6 +4,7 @@ error_reporting(0);
 require_once('include/config.php');
 require_once('../include/csrf.php');
 require_once('../include/login_throttle.php');
+require_once('../include/password_migration.php');
 $msg = "";
 if(isset($_POST['submit'])) {
   if (!csrf_verify()) {
@@ -13,20 +14,26 @@ if(isset($_POST['submit'])) {
   if (throttle_blocked($dbh, $email)) {
     $msg = "Too many failed attempts. Please try again later.";
   } else {
-  $password = md5(($_POST['password']));
-  if($email != "" && $password != "") {
+  $plainPassword = isset($_POST['password']) ? $_POST['password'] : '';
+  if($email != "" && $plainPassword != "") {
     try {
-      $query = "select id, name, email, mobile, password, status from tbltrainers where email=:email and password=:password";
+      $query = "select id, name, email, mobile, password, status from tbltrainers where email=:email";
       $stmt = $dbh->prepare($query);
       $stmt->bindParam('email', $email, PDO::PARAM_STR);
-      $stmt->bindValue('password', $password, PDO::PARAM_STR);
       $stmt->execute();
-      $count = $stmt->rowCount();
       $row   = $stmt->fetch(PDO::FETCH_ASSOC);
-      if($count == 1 && !empty($row)) {
+      if(!empty($row) && !empty($row['password']) && password_verify_compat($plainPassword, $row['password'])) {
         if($row['status'] == 0) {
           $msg = "Your account is inactive. Contact the administrator.";
         } else {
+          // Transparently upgrade a legacy MD5 hash to password_hash().
+          if (password_needs_upgrade($row['password'])) {
+            $rehash = $dbh->prepare("update tbltrainers set password=:newpassword where id=:id");
+            $newhash = password_hash_new($plainPassword);
+            $rehash->bindParam(':newpassword', $newhash, PDO::PARAM_STR);
+            $rehash->bindParam(':id', $row['id'], PDO::PARAM_INT);
+            $rehash->execute();
+          }
           throttle_clear($dbh, $email);
           session_regenerate_id(true);
           $_SESSION['trainerid']   = $row['id'];

@@ -5,6 +5,7 @@ error_reporting(0);
 require_once('include/config.php');
 require_once('../include/csrf.php');
 require_once('../include/login_throttle.php');
+require_once('../include/password_migration.php');
 $msg = ""; 
 if(isset($_POST['submit'])) {
   if (!csrf_verify()) {
@@ -14,17 +15,23 @@ if(isset($_POST['submit'])) {
   if (throttle_blocked($dbh, $email)) {
     $msg = "Too many failed attempts. Please try again later.";
   } else {
-  $password = md5(($_POST['password']));
-  if($email != "" && $password != "") {
+  $plainPassword = isset($_POST['password']) ? $_POST['password'] : '';
+  if($email != "" && $plainPassword != "") {
     try {
-      $query = "select id, name, email, mobile, password, create_date from tbladmin where email=:email and password=:password";
+      $query = "select id, name, email, mobile, password, create_date from tbladmin where email=:email";
       $stmt = $dbh->prepare($query);
       $stmt->bindParam('email', $email, PDO::PARAM_STR);
-      $stmt->bindValue('password', $password, PDO::PARAM_STR);
       $stmt->execute();
-      $count = $stmt->rowCount();
       $row   = $stmt->fetch(PDO::FETCH_ASSOC);
-      if($count == 1 && !empty($row)) {
+      if(!empty($row) && !empty($row['password']) && password_verify_compat($plainPassword, $row['password'])) {
+        // Transparently upgrade a legacy MD5 hash to password_hash().
+        if (password_needs_upgrade($row['password'])) {
+          $rehash = $dbh->prepare("update tbladmin set password=:newpassword where id=:id");
+          $newhash = password_hash_new($plainPassword);
+          $rehash->bindParam(':newpassword', $newhash, PDO::PARAM_STR);
+          $rehash->bindParam(':id', $row['id'], PDO::PARAM_INT);
+          $rehash->execute();
+        }
         /******************** Your code ***********************/
         throttle_clear($dbh, $email);
         session_regenerate_id(true);

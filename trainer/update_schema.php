@@ -143,7 +143,7 @@ if ($row->c == 0) {
     $seed->bindValue(':name', 'Test Trainer', PDO::PARAM_STR);
     $seed->bindValue(':email', 'trainer@hotsport.com', PDO::PARAM_STR);
     $seed->bindValue(':mobile', '0700000000', PDO::PARAM_STR);
-    $seed->bindValue(':password', md5('trainer123'), PDO::PARAM_STR);
+    $seed->bindValue(':password', password_hash('trainer123', PASSWORD_DEFAULT), PDO::PARAM_STR);
     $seed->bindValue(':specialization', 'Strength & Conditioning', PDO::PARAM_STR);
     $seed->bindValue(':bio', 'Default test trainer account.', PDO::PARAM_STR);
     $seed->execute();

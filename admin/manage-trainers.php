@@ -2,6 +2,7 @@
 	error_reporting(0);
 	include  'include/config.php';
 	require_once '../include/csrf.php';
+	require_once '../include/password_migration.php';
 	if (strlen($_SESSION['adminid'])==0) {
 	  header('location:logout.php');
 	  } else {
@@ -32,7 +33,7 @@
 		$query -> execute();
 		$msg= "Trainer Updated Successfully";
 	} else {
-		$password = md5($_POST['password']);
+		$password = password_hash_new($_POST['password']);
 		$sql="INSERT INTO tbltrainers (name,email,mobile,password,specialization,bio,status) Values(:name,:email,:mobile,:password,:specialization,:bio,:status)";
 		$query = $dbh -> prepare($sql);
 		$query->bindParam(':name',$name,PDO::PARAM_STR);
